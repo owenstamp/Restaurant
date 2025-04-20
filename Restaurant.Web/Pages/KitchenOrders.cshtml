@@ -1,0 +1,71 @@
+﻿@page
+@model KitchenOrdersModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager" && role != "Kitchen")
+{
+        <h2>Access Denied</h2>
+        <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="order-status-section">
+    <h2>Kitchen Orders</h2>
+
+    @if (Model.Message != null)
+    {
+            <p class="info">@Model.Message</p>
+    }
+
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Items</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.Orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.OrderDateTime.ToLocalTime().ToString("g")</td>
+                    <td>@order.Status</td>
+                    <td>
+                        <ul>
+                            @foreach (var item in order.Items)
+                            {
+                                <li>
+                                    @item.Quantity x
+                                    @(Model.MenuItemNames.ContainsKey(item.MenuItemId)
+                                        ? Model.MenuItemNames[item.MenuItemId]
+                                        : "Unknown Item")
+                                </li>
+                            }
+                        </ul>
+                    </td>
+
+                    <td>
+                        <form method="post">
+                            <input type="hidden" name="OrderId" value="@order.Id" />
+                            @if (order.Status.ToString() == "Received")
+                            {
+                                    <button name="Action" value="Preparing">Start Preparing</button>
+                            }
+                            else if (order.Status.ToString() == "Preparing")
+                            {
+                                    <button name="Action" value="Ready">Mark Ready</button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

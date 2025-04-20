@@ -1,0 +1,80 @@
+﻿@page
+@model MenuModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager" && role != "Admin")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="menu-section">
+    <h2>Menu Management</h2>
+
+    <!-- Form to Add Menu Item -->
+    <form method="post" class="menu-form">
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input type="text" id="Name" name="Name" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Category">Category</label>
+            <input type="text" id="Category" name="Category" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Price">Price</label>
+            <input type="number" step="0.01" id="Price" name="Price" required />
+        </div>
+
+        <div class="form-group">
+            <label for="SpecialDietaryInfo">Dietary Info</label>
+            <input type="text" id="SpecialDietaryInfo" name="SpecialDietaryInfo" />
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="IsAvailable" value="true" /> Available
+            </label>
+        </div>
+
+        <button type="submit" class="btn">Add Menu Item</button>
+    </form>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <!-- Menu Table -->
+    <h3>Current Menu</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Dietary</th>
+                <th>Available</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.MenuItems)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Category</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.SpecialDietaryInfo</td>
+                    <td>@(item.IsAvailable ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</section>

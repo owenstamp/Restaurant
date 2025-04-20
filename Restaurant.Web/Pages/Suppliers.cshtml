@@ -1,0 +1,115 @@
+﻿@page
+@model SuppliersModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+
+}
+
+@if (role != "Manager" && role != "Admin")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="supplier-section">
+    <h2>Supplier Management</h2>
+
+    <!-- Form to Add New Supplier -->
+    <form method="post" class="supplier-form">
+        <div class="form-group">
+            <label for="SupplierName">Supplier Name</label>
+            <input type="text" id="SupplierName" name="SupplierName" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ContactInfo">Contact Info</label>
+            <input type="text" id="ContactInfo" name="ContactInfo" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ProductTypes">Product Types</label>
+            <input type="text" id="ProductTypes" name="ProductTypes" required />
+        </div>
+
+        <button type="submit" class="btn">Add Supplier</button>
+    </form>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <!-- List of Existing Suppliers -->
+    <h3>Current Suppliers</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Supplier Name</th>
+                <th>Contact Info</th>
+                <th>Product Types</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var supplier in Model.Suppliers)
+            {
+                <tr>
+                    <td>@supplier.SupplierName</td>
+                    <td>@supplier.ContactInfo</td>
+                    <td>@supplier.ProductTypes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+<style>
+    .supplier-section {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-family: 'Jost', sans-serif;
+    }
+    .supplier-form {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .form-group label {
+        font-weight: 600;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .btn {
+        background-color: #007b5e;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .styled-table th, .styled-table td {
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+    }
+    .styled-table th {
+        background-color: #f4f4f4;
+    }
+    .info {
+        color: green;
+        font-weight: 500;
+    }
+</style>

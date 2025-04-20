@@ -1,0 +1,276 @@
+﻿@page
+@model StaffDashboardModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+    var staffIdString = HttpContext.Session.GetString("StaffId") ?? "";
+}
+
+@if (string.IsNullOrEmpty(staffIdString))
+{
+    <h2>Not Logged In</h2>
+    <p>Please log in to view your dashboard.</p>
+    return;
+}
+
+<section class="staff-dashboard">
+    <h2>Staff Dashboard</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <p class="info">@TempData["SuccessMessage"]</p>
+    }
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    @if (role == "Manager")
+    {
+        <h3>Shift Calendar (Manager View)</h3>
+        <div id="calendar"></div>
+
+        <!-- Shift Modal for Managers -->
+        <div id="shiftModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h3>Add Shift</h3>
+                <form method="post">
+                    <input type="hidden" name="CalendarAction" value="AddShift" />
+                    <div class="form-group">
+                        <label>Staff Member</label>
+                        <select name="StaffId" required>
+                            @foreach (var s in Model.StaffList)
+                            {
+                                <option value="@s.Id">@s.FirstName @s.LastName (@s.Role)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" name="ShiftDate" id="ShiftDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" name="ShiftStartTime" required />
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" name="ShiftEndTime" required />
+                    </div>
+                    <button type="submit" class="btn">Assign Shift</button>
+                </form>
+            </div>
+        </div>
+    }
+
+    @if (role == "Waitstaff" || role == "Kitchen" || role == "Manager")
+    {
+        <h3>My Upcoming Shifts</h3>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th>Swap</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shift in Model.MyShifts)
+                {
+                    <tr>
+                        <td>@shift.ShiftDate.ToShortDateString()</td>
+                        <td>@shift.ShiftStartTime</td>
+                        <td>@shift.ShiftEndTime</td>
+                        <td>@shift.Status</td>
+                        <td>
+                            <button type="button" onclick="openSwapModal('@shift.Id', '@shift.ShiftDate.ToString("yyyy-MM-dd")', '@shift.ShiftStartTime', '@shift.ShiftEndTime')">Swap</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+
+        <h3>Request Time Off</h3>
+        <form method="post">
+            <div class="form-group">
+                <label>From</label>
+                <input type="date" name="StartDate" required />
+            </div>
+            <div class="form-group">
+                <label>To</label>
+                <input type="date" name="EndDate" required />
+            </div>
+            <div class="form-group">
+                <label>Reason</label>
+                <textarea name="Reason" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn">Submit Time-Off Request</button>
+        </form>
+
+        @if (Model.IncomingSwapRequests.Any())
+        {
+            <h3>Swap Requests Awaiting Your Approval</h3>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Requested By</th>
+                        <th>Their Shift</th>
+                        <th>Your Shift</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var swap in Model.IncomingSwapRequests)
+                    {
+                        var requester = Model.StaffList.FirstOrDefault(s => s.Id == swap.RequestingStaffId);
+                        var theirShift = Model.AllShifts.FirstOrDefault(s => s.Id == swap.OriginalShiftId);
+
+                        DateTime? shiftDate = theirShift?.ShiftDate;
+                        TimeSpan? start = theirShift?.ShiftStartTime;
+                        TimeSpan? end = theirShift?.ShiftEndTime;
+
+                        var yourShift = Model.AllShifts.FirstOrDefault(s =>
+                        s.StaffId == swap.TargetStaffId &&
+                        s.Id != swap.OriginalShiftId &&
+                        s.ShiftDate == shiftDate &&
+                        s.ShiftStartTime == start &&
+                        s.ShiftEndTime == end);
+
+                        <tr>
+                            <td>@(requester?.FirstName) @(requester?.LastName)</td>
+                            <td>@(theirShift?.ShiftDate.ToShortDateString()) @theirShift?.ShiftStartTime – @theirShift?.ShiftEndTime</td>
+                            <td>@(yourShift?.ShiftDate.ToShortDateString()) @yourShift?.ShiftStartTime – @yourShift?.ShiftEndTime</td>
+                            <td>
+                                <form method="post">
+                                 
+                                    <input type="hidden" name="SwapRequestId" value="@swap.Id" />
+                                    <button name="SwapAction" value="Accept">Accept</button>
+                                    <button name="SwapAction" value="Decline">Decline</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        }
+    }
+</section>
+<div id="swapModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeSwapModal()">&times;</span>
+        <h3>Propose a Shift Swap</h3>
+        <form method="post">
+            <input type="hidden" name="OriginalShiftId" id="OriginalShiftId" />
+
+            <div class="form-group">
+                <label>Swap With (Staff)</label>
+                <select name="TargetStaffId" required>
+                    @foreach (var s in Model.StaffList.Where(s => s.Id.ToString() != staffIdString))
+                    {
+                        <option value="@s.Id">@s.FirstName @s.LastName (@s.Role)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Their Shift Date</label>
+                <input type="date" name="TargetDate" required />
+            </div>
+
+            <div class="form-group">
+                <label>Start Time</label>
+                <input type="time" name="TargetStartTime" required />
+            </div>
+
+            <div class="form-group">
+                <label>End Time</label>
+                <input type="time" name="TargetEndTime" required />
+            </div>
+
+            <button class="btn" type="submit" name="CalendarAction" value="RequestSwap">Submit Swap Request</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        margin: 10% auto;
+        padding: 1.5rem;
+        width: 60%;
+        border-radius: 8px;
+    }
+
+    .close-btn {
+        float: right;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function openSwapModal(shiftId, date, start, end) {
+        document.getElementById("OriginalShiftId").value = shiftId;
+        document.getElementById("swapModal").style.display = "block";
+    }
+
+    function closeSwapModal() {
+        document.getElementById("swapModal").style.display = "none";
+    }
+
+    window.addEventListener('click', function (e) {
+        const modal = document.getElementById("swapModal");
+        if (modal && e.target === modal) {
+            closeSwapModal();
+        }
+    });
+</script>
+
+<!-- Calendar Scripts -->
+@if (role == "Manager")
+{
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            if (calendarEl) {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek'
+                    },
+                    dateClick: function (info) {
+                        document.getElementById('ShiftDate').value = info.dateStr;
+                        document.getElementById('shiftModal').style.display = 'block';
+                    },
+                    events: @Html.Raw(Model.CalendarEventsJson)
+                });
+                calendar.render();
+            }
+        });
+
+        function closeModal() {
+            document.getElementById("shiftModal").style.display = "none";
+        }
+    </script>
+}

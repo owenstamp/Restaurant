@@ -1,0 +1,77 @@
+﻿@page
+@model OrdersModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager" && role != "Waitstaff")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="orders-section">
+    <h2>Create New Order</h2>
+
+    <form method="post" class="order-form">
+        <div class="form-group">
+            <label for="MenuItemId">Menu Item</label>
+            <select id="MenuItemId" name="MenuItemId" required>
+                <option value="">-- Select Item --</option>
+                @foreach (var item in Model.MenuItems)
+                {
+                    <option value="@item.Id">@item.Name (@item.Price.ToString("C"))</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="Quantity">Quantity</label>
+            <input type="number" id="Quantity" name="Quantity" min="1" required />
+        </div>
+
+        <div class="form-group">
+            <label for="SpecialRequest">Special Request</label>
+            <input type="text" id="SpecialRequest" name="SpecialRequest" />
+        </div>
+
+        <button type="submit" class="btn">Place Order</button>
+    </form>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <h3>Recent Orders</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Special Request</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.RecentOrders)
+            {
+                foreach (var item in order.Items)
+                {
+                    <tr>
+                        <td>@order.OrderDateTime.ToShortTimeString()</td>
+                        <td>@Model.GetMenuItemName(item.MenuItemId)</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Price.ToString("C")</td>
+                        <!-- <td></td>-->
+                        <td>@(item.Price * item.Quantity).ToString("C")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</section>

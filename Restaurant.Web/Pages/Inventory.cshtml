@@ -1,0 +1,77 @@
+﻿@page
+@model InventoryModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager" && role != "Admin")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="inventory-section">
+    <h2>Inventory Management</h2>
+
+    <!-- Form to Add New Inventory Item -->
+    <form method="post" class="inventory-form">
+        <div class="form-group">
+            <label for="ItemName">Item Name</label>
+            <input type="text" id="ItemName" name="ItemName" required />
+        </div>
+
+        <div class="form-group">
+            <label for="QuantityOnHand">Quantity</label>
+            <input type="number" id="QuantityOnHand" name="QuantityOnHand" min="0" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ReorderLevel">Reorder Level</label>
+            <input type="number" id="ReorderLevel" name="ReorderLevel" min="0" required />
+        </div>
+
+        <div class="form-group">
+            <label for="SupplierId">Supplier</label>
+            <select id="SupplierId" name="SupplierId" required>
+                <option value="">-- Select Supplier --</option>
+                @foreach (var supplier in Model.Suppliers)
+                {
+                    <option value="@supplier.Id">@supplier.SupplierName</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn">Add Inventory Item</button>
+    </form>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <!-- Inventory Table -->
+    <h3>Current Inventory</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Reorder Level</th>
+                <th>Supplier</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.InventoryItems)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td>@item.QuantityOnHand</td>
+                    <td>@item.ReorderLevel</td>
+                    <td>@Model.GetSupplierName(item.SupplierId)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

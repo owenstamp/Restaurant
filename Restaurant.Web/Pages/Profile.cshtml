@@ -1,0 +1,41 @@
+﻿@page
+@model ProfileModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+    var username = HttpContext.Session.GetString("Username") ?? "";
+}
+
+@if (string.IsNullOrEmpty(username))
+{
+    <h2>Not Logged In</h2>
+    <p>Please log in to view your profile.</p>
+    return;
+}
+
+<section class="profile-section">
+    <h2>Welcome, @Model.Staff?.FirstName!</h2>
+
+    <h3>Account Info</h3>
+    <ul>
+        <li><strong>Username:</strong> @Model.User?.Username</li>
+        <li><strong>Role:</strong> @Model.User?.Role</li>
+        <li><strong>Active:</strong> @(Model.User?.IsActive == true ? "Yes" : "No")</li>
+    </ul>
+
+    <h3>Staff Profile</h3>
+    @if (Model.Staff != null)
+    {
+        <ul>
+            <li><strong>Name:</strong> @Model.Staff.FirstName @Model.Staff.LastName</li>
+            <li><strong>Email:</strong> @Model.Staff.Email</li>
+            <li><strong>Phone:</strong> @Model.Staff.PhoneNumber</li>
+            <li><strong>Role:</strong> @Model.Staff.Role</li>
+            <li><strong>Hired On:</strong> @Model.Staff.HireDate.ToShortDateString()</li>
+        </ul>
+    }
+    else
+    {
+        <p>No staff profile found for your account.</p>
+    }
+</section>

@@ -1,0 +1,62 @@
+﻿@page
+@model TimeOffRequestsModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="timeoff-section">
+    <h2>Time-Off Requests</h2>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Staff</th>
+                <th>Dates</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model.Requests)
+            {
+                var staff = Model.StaffList.FirstOrDefault(s => s.Id == request.StaffId);
+                <tr>
+                    <td>@(staff?.FirstName) @(staff?.LastName)</td>
+                    <td>@request.StartDate.ToShortDateString() – @request.EndDate.ToShortDateString()</td>
+                    <td>@request.Reason</td>
+                    <td>@request.Status</td>
+                    <td>@request.RequestedAt.ToString("g")</td>
+                    <td>
+                        @if (request.Status == Restaurant.Domain.Entities.TimeOffRequest.RequestStatus.Pending)
+                        {
+                            <form method="post">
+                                <input type="hidden" name="RequestId" value="@request.Id" />
+                                <button name="Action" value="Approve">Approve</button>
+                                <button name="Action" value="Deny">Deny</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

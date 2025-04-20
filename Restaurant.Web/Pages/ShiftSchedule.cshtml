@@ -1,0 +1,81 @@
+﻿@page
+@model ShiftScheduleModel
+@{
+    Layout = "_Layout";
+    var role = HttpContext.Session.GetString("UserRole") ?? "";
+}
+
+@if (role != "Manager")
+{
+    <h2>Access Denied</h2>
+    <p>You do not have permission to view this page.</p>
+    return;
+}
+
+<section class="shift-section">
+    <h2>Staff Shift Scheduling</h2>
+
+    <!-- Form to assign a new shift -->
+    <form method="post" class="shift-form">
+        <div class="form-group">
+            <label for="StaffId">Staff Member</label>
+            <select name="StaffId" required>
+                @foreach (var staff in Model.StaffList)
+                {
+                    <option value="@staff.Id">@staff.FirstName @staff.LastName (@staff.Role)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ShiftDate">Date</label>
+            <input type="date" name="ShiftDate" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ShiftStartTime">Start Time</label>
+            <input type="time" name="ShiftStartTime" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ShiftEndTime">End Time</label>
+            <input type="time" name="ShiftEndTime" required />
+        </div>
+
+        <button type="submit" class="btn">Assign Shift</button>
+    </form>
+
+    @if (Model.Message != null)
+    {
+        <p class="info">@Model.Message</p>
+    }
+
+    <!-- Shift Table -->
+    <h3>Upcoming Shifts</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Staff</th>
+                <th>Role</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var shift in Model.Shifts)
+            {
+                var staff = Model.StaffList.FirstOrDefault(s => s.Id == shift.StaffId);
+                <tr>
+                    <td>@shift.ShiftDate.ToShortDateString()</td>
+                    <td>@shift.ShiftStartTime</td>
+                    <td>@shift.ShiftEndTime</td>
+                    <td>@(staff != null ? staff.FirstName + " " + staff.LastName : "Unknown")</td>
+                    <td>@(staff?.Role ?? "")</td>
+                    <td>@shift.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

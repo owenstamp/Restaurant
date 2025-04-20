@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Service</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/styles.css">
+</head>
+<body>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="menu-toggle" id="hamburger-menu" onclick="toggleDrawer()">
+            <span class="material-icons">menu</span>
+        </div>
+        <div class="logo">Restaurant</div>
+        <div class="menu-items">
+            <a href="/Index">Home</a>
+            <a href="/Reservations">Reservations</a>
+            <a href="/Orders">Orders</a>
+            <a href="/Contact">Contact</a>
+        </div>
+    </div>
+
+    <!-- Drawer -->
+    <div id="desktop-drawer" class="drawer">
+        <button class="close-btn" onclick="toggleDrawer()">X</button>
+        <ul class="drawer-menu">
+            <li><a href="/Index" onclick="closeDrawer()">Home <span class="material-icons">home</span></a></li>
+            <li><a href="/About" onclick="closeDrawer()">About <span class="material-icons">info</span></a></li>
+            <li>
+                <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                    Services <span class="material-icons">build</span>
+                    <span class="material-icons right-icon">keyboard_arrow_down</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/Menu" onclick="closeDrawer()">Menu <span class="material-icons">restaurant_menu</span></a></li>
+                    <li><a href="/Inventory" onclick="closeDrawer()">Inventory <span class="material-icons">inventory</span></a></li>
+                    <li><a href="/Reports" onclick="closeDrawer()">Reports <span class="material-icons">bar_chart</span></a></li>
+                </ul>
+            </li>
+            <li><a href="/Contact" onclick="closeDrawer()">Contact <span class="material-icons">contact_mail</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <h1>Restaurant Dashboard</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 RestaurantService. All rights reserved.</p>
+    </footer>
+
+    <!-- Bottom Navigation -->
+    <div id="mobile-tab-bar" class="bottom-nav">
+        <a href="/Index" class="tab-item"><span class="material-icons">home</span><span>Home</span></a>
+        <a href="/About" class="tab-item"><span class="material-icons">info</span><span>About</span></a>
+        <a href="/Menu" class="tab-item"><span class="material-icons">restaurant_menu</span><span>Menu</span></a>
+        <a href="/Contact" class="tab-item"><span class="material-icons">contact_mail</span><span>Contact</span></a>
+    </div>
+
+    <!-- Drawer and Dropdown Script -->
+    <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('desktop-drawer');
+            drawer.style.display = drawer.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeDrawer() {
+            const drawer = document.getElementById('desktop-drawer');
+            drawer.style.display = 'none';
+        }
+
+        function toggleDropdown(event) {
+            event.preventDefault();
+            const link = event.target.closest('a');
+            const dropdown = link.nextElementSibling;
+            const icon = link.querySelector(".right-icon");
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            icon.textContent = dropdown.style.display === 'block' ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+        }
+
+        window.addEventListener('click', function(e) {
+            const drawer = document.getElementById('desktop-drawer');
+            const hamburger = document.getElementById('hamburger-menu');
+            if (!drawer.contains(e.target) && !hamburger.contains(e.target)) {
+                drawer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
