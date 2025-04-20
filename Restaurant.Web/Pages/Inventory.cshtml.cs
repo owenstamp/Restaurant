@@ -43,7 +43,7 @@ namespace Restaurant.Web.Pages
         public IActionResult OnPost()
         {
             Suppliers = _context.Suppliers.ToList();
-
+            //
             if (!ModelState.IsValid || string.IsNullOrWhiteSpace(ItemName))
             {
                 Message = "Please fill in all required fields.";
