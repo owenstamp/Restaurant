@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
+using Restaurant.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,56 +10,55 @@ namespace Restaurant.Web.Pages
 {
     public class MenuModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly IMenuItemRepository _menuRepo;
 
-        public MenuModel(AppDbContext context)
+        public MenuModel(IMenuItemRepository menuRepo)
         {
-            _context = context;
+            _menuRepo = menuRepo;
         }
-
-        [BindProperty]
-        public string Name { get; set; }
-
-        [BindProperty]
-        public string Category { get; set; }
-
-        [BindProperty]
-        public decimal Price { get; set; }
-
-        [BindProperty]
-        public string SpecialDietaryInfo { get; set; }
-
-        [BindProperty]
-        public bool IsAvailable { get; set; }
 
         public List<MenuItem> MenuItems { get; set; } = new();
 
+        [BindProperty] public string Name { get; set; }
+        [BindProperty] public string Category { get; set; }
+        [BindProperty] public decimal Price { get; set; }
+        [BindProperty] public string SpecialDietaryInfo { get; set; }
+        [BindProperty] public bool IsAvailable { get; set; }
         public string Message { get; set; }
 
         public void OnGet()
         {
-            MenuItems = _context.MenuItems.ToList();
+            // Load all menu items
+            MenuItems = _menuRepo.GetAll().ToList();
         }
 
         public IActionResult OnPost()
         {
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(Name))
+            // Simple validation
+            if (string.IsNullOrWhiteSpace(Name)
+                || string.IsNullOrWhiteSpace(Category)
+                || Price <= 0m)
             {
-                Message = "Please fill in all required fields.";
-                MenuItems = _context.MenuItems.ToList();
+                Message = "Please fill in Name, Category, and a positive Price.";
+                OnGet();
                 return Page();
             }
 
-            var newItem = new MenuItem(Name, Category, Price, SpecialDietaryInfo);
-            newItem.SetAvailability(IsAvailable); // ✅ set IsAvailable via method
+            // Create via domain constructor (Id inside) or manually set Id if needed
+            MenuItem newItem = new(
+                Name,
+                Category,
+                Price,
+                IsAvailable,
+                SpecialDietaryInfo
 
-            _context.MenuItems.Add(newItem);
-            _context.SaveChanges();
+            );
 
+            _menuRepo.Add(newItem);
             Message = "Menu item added successfully.";
-            MenuItems = _context.MenuItems.ToList();
-            return Page();
-        }
 
+            // Redirect to clear the form and reload list
+            return RedirectToPage();
+        }
     }
 }

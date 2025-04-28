@@ -5,73 +5,174 @@
     var role = HttpContext.Session.GetString("UserRole") ?? "";
 }
 
+@* Role Check - Redirecting in code-behind is often better *@
 @if (role != "Manager" && role != "Waitstaff")
 {
     <h2>Access Denied</h2>
     <p>You do not have permission to view this page.</p>
+    @* Consider RedirectToPage in OnGet if unauthorized *@
     return;
 }
 
-<section class="orders-section">
-    <h2>Create New Order</h2>
+<section class="view-container">
+    @* Using view-container for consistency *@
+    <h2>Create / Modify Order</h2>
 
-    <form method="post" class="order-form">
-        <div class="form-group">
-            <label for="MenuItemId">Menu Item</label>
-            <select id="MenuItemId" name="MenuItemId" required>
-                <option value="">-- Select Item --</option>
-                @foreach (var item in Model.MenuItems)
-                {
-                    <option value="@item.Id">@item.Name (@item.Price.ToString("C"))</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="Quantity">Quantity</label>
-            <input type="number" id="Quantity" name="Quantity" min="1" required />
-        </div>
-
-        <div class="form-group">
-            <label for="SpecialRequest">Special Request</label>
-            <input type="text" id="SpecialRequest" name="SpecialRequest" />
-        </div>
-
-        <button type="submit" class="btn">Place Order</button>
-    </form>
-
-    @if (Model.Message != null)
+    @* Display Messages *@
+    @if (!string.IsNullOrEmpty(Model.Message))
     {
-        <p class="info">@Model.Message</p>
+        <div class="alert alert-info">@Model.Message</div> @* Use alert-info or alert-success *@
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
     }
 
-    <h3>Recent Orders</h3>
-    <table class="styled-table">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Special Request</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model.RecentOrders)
-            {
-                foreach (var item in order.Items)
-                {
-                    <tr>
-                        <td>@order.OrderDateTime.ToShortTimeString()</td>
-                        <td>@Model.GetMenuItemName(item.MenuItemId)</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Price.ToString("C")</td>
-                        <!-- <td></td>-->
-                        <td>@(item.Price * item.Quantity).ToString("C")</td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+    @* Section for Adding Items *@
+    <div class="add-item-section card mb-4">
+        @* Wrap in card for styling *@
+        <div class="card-header">Add Item to Order</div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="AddItem" class="add-item-form">
+                <div class="row g-3">
+                    @* Use Bootstrap grid for layout *@
+                    <div class="col-md-4">
+                        <label for="MenuItemId" class="form-label">Menu Item</label>
+                        <select id="MenuItemId" name="MenuItemId" asp-for="MenuItemId" class="form-select" required>
+                            <option value="">-- Select Item --</option>
+                            @foreach (var item in Model.MenuItems)
+                            {
+                                <option value="@item.Id">@item.Name (@item.Price.ToString("C"))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="Quantity" class="form-label">Quantity</label>
+                        <input type="number" id="Quantity" name="Quantity" asp-for="Quantity" min="1" value="1" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="SpecialRequest" class="form-label">Special Request</label>
+                        <input type="text" id="SpecialRequest" name="SpecialRequest" asp-for="SpecialRequest" class="form-control" />
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-secondary w-100">
+                            <span class="material-icons" style="vertical-align: middle; font-size: 1.1em;">add_shopping_cart</span> Add Item
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* Section to Display Current Order *@
+    @if (Model.CurrentOrder != null && Model.CurrentOrderItems.Any())
+    {
+        <div class="current-order-section card mb-4">
+            <div class="card-header">
+                Current Order (@Model.CurrentOrder.Id.ToString().Substring(0, 8)...)
+                <form method="post" asp-page-handler="CancelOrder" style="display: inline; float: right;">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this entire order?');">
+                        <span class="material-icons" style="vertical-align: middle; font-size: 1.1em;">delete_forever</span> Cancel Order
+                    </button>
+                </form>
+            </div>
+            <div class="card-body">
+                <ul class="item-list">
+                    @* Using item-list style from CSS *@
+                    @foreach (var item in Model.CurrentOrderItems)
+                    {
+                        <li>
+                            <strong>@item.MenuItemName</strong> (x @item.Quantity) - @item.Price.ToString("C") each
+                            @if (!string.IsNullOrEmpty(item.SpecialRequests))
+                            {
+                                <div style="padding-left: 15px;"><small><i>Request: @item.SpecialRequests</i></small></div>
+                            }
+                            @* Add a Remove Item button here if needed *@
+                            @* <form method="post" asp-page-handler="RemoveItem" asp-route-orderItemId="@item.Id" style="display:inline;">
+                                 <button type="submit" class="btn btn-sm btn-warning">Remove</button>
+                             </form> *@
+                        </li>
+                    }
+                </ul>
+                <hr />
+                <div class="text-end">
+                    @* Align total to the right *@
+                    <strong>Order Total: @Model.CurrentOrderItems.Sum(i => i.LineTotal).ToString("C")</strong>
+                </div>
+                <div class="mt-3 text-center">
+                    @* Centered submit button *@
+                    <form method="post" asp-page-handler="SubmitOrder">
+                        <button type="submit" class="btn btn-lg">
+                            @* Primary button style applied by default *@
+                            <span class="material-icons" style="vertical-align: middle; font-size: 1.1em;">send</span> Submit Full Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.CurrentOrder != null) // Order created but no items added yet
+    {
+        <div class="alert alert-warning">
+            Current order started (@Model.CurrentOrder.Id.ToString().Substring(0, 8)...). Add items above.
+            <form method="post" asp-page-handler="CancelOrder" style="display: inline; float: right;">
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this empty order?');">
+                    Cancel Order
+                </button>
+            </form>
+        </div>
+    }
+
+
+    @* Section for Recent Orders (Unchanged from original, but verify class names) *@
+    <div class="recent-orders-section mt-5">
+        <h2>Recent Orders</h2>
+        @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+        {
+            <div class="table-container">
+                @* Use table container for overflow *@
+                <table>
+                    @* Use base table styles *@
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date/Time</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <tr>
+                                <td>@order.Id.ToString().Substring(0, 8)...</td> @* Shorten ID for display *@
+                                <td>@order.OrderDateTime.ToString("g")</td>
+                                <td>@order.Status</td>
+                                <td>@order.TotalAmount.ToString("C")</td>
+                                <td>
+                                    @if (order.Items != null && order.Items.Any())
+                                    {
+                                        @string.Join(", ", order.Items.Select(i => $"{Model.GetMenuItemName(i.MenuItemId)} (x{i.Quantity})"))
+                                        @* More detailed view could be a link/modal *@
+                                    }
+                                    else
+                                    {
+                                        <small>(No items)</small>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>No recent orders found.</p>
+        }
+    </div>
 </section>

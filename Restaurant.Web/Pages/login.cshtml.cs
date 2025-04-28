@@ -1,72 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Http;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
-using System.Linq;
+using Restaurant.Domain.Interfaces;
+using BCrypt.Net;
 
-namespace Restaurant.Web.Pages // 👈 This is the key part!
+namespace Restaurant.Web.Pages
 {
     public class LoginModel : PageModel
     {
-        private readonly AppDbContext _context;
-
-        public LoginModel(AppDbContext context)
+        private readonly IUserAccountRepository _accounts;
+        public LoginModel(IUserAccountRepository accounts)
         {
-            _context = context;
+            _accounts = accounts;
         }
 
-        [BindProperty]
-        public string Username { get; set; }
-
-        [BindProperty]
-        public string Password { get; set; }
-
+        [BindProperty] public string Username { get; set; }
+        [BindProperty] public string Password { get; set; }
         public bool LoginFailed { get; set; }
 
-        public void OnGet()
-        {
-            // Optional: clear session on visiting login
-            // HttpContext.Session.Clear();
-        }
+        public void OnGet() { }
 
         public IActionResult OnPost()
         {
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            // 1) Fetch via repo instead of DbContext
+            var account = _accounts.GetByUsername(Username);
+
+            // 2) Validate password & active flag
+            if (account != null
+                && BCrypt.Net.BCrypt.Verify(Password, account.PasswordHash)
+                && account.IsActive)
             {
-                LoginFailed = true;
-                TempData["Debug"] = "❌ Empty fields";
-                return Page();
+                HttpContext.Session.SetString("UserRole", account.Role);
+                HttpContext.Session.SetString("StaffId", account.StaffId.ToString());
+                HttpContext.Session.SetString("Username", account.Username);
+                return RedirectToPage("/Index");
             }
 
-            var trimmedUsername = Username.Trim().ToLower();
-            var allUsers = _context.UserAccounts.ToList();
-            TempData["Debug"] = $"👥 Loaded {allUsers.Count} users";
-
-            var account = allUsers.FirstOrDefault(u => u.Username?.Trim().ToLower() == trimmedUsername);
-
-            if (account == null)
-            {
-                TempData["Debug"] = "🚫 No matching user.";
-                LoginFailed = true;
-                return Page();
-            }
-
-            if (!BCrypt.Net.BCrypt.Verify(Password, account.PasswordHash))
-            {
-                TempData["Debug"] = "🔐 Password incorrect.";
-                LoginFailed = true;
-                return Page();
-            }
-
-            HttpContext.Session.SetString("Username", account.Username);
-            HttpContext.Session.SetString("UserRole", account.Role ?? "User");
-            HttpContext.Session.SetString("StaffId", account.StaffId.ToString());
-
-            TempData["Debug"] = $"🎉 Logged in as {account.Username}";
-
-            return RedirectToPage("/Index");
+            // 3) On failure, re-render the page with an error
+            LoginFailed = true;
+            return Page();
         }
-
     }
 }

@@ -11,14 +11,14 @@ namespace Restaurant.Domain.Entities
         public string SpecialDietaryInfo { get; private set; } // e.g., Vegan, Gluten-Free
         public bool IsAvailable { get; private set; }
 
-        public MenuItem(string name, string category, decimal price, string specialDietaryInfo = null)
+        public MenuItem(string name, string category, decimal price, bool isAvailable, string specialDietaryInfo = null)
         {
             Id = Guid.NewGuid();
             Name = name;
             Category = category;
             Price = price;
             SpecialDietaryInfo = specialDietaryInfo;
-            IsAvailable = true;
+            IsAvailable = isAvailable;
         }
 
         // Domain logic

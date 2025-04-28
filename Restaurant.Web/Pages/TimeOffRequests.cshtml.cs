@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
+using Restaurant.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +10,16 @@ namespace Restaurant.Web.Pages
 {
     public class TimeOffRequestsModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly ITimeOffRequestRepository _timeOffRepo;
+        private readonly IStaffRepository _staffRepo;
 
-        public TimeOffRequestsModel(AppDbContext context)
+        public TimeOffRequestsModel(
+            ITimeOffRequestRepository timeOffRepo,
+            IStaffRepository staffRepo)
         {
-            _context = context;
+            _timeOffRepo = timeOffRepo;
+            _staffRepo = staffRepo;
         }
-
-        [BindProperty] public Guid RequestId { get; set; }
-        [BindProperty] public string Action { get; set; }
 
         public List<TimeOffRequest> Requests { get; set; } = new();
         public List<Staff> StaffList { get; set; } = new();
@@ -27,41 +27,43 @@ namespace Restaurant.Web.Pages
 
         public void OnGet()
         {
-            Requests = _context.TimeOffRequests
-                .OrderByDescending(r => r.RequestedAt)
-                .ToList();
-
-            StaffList = _context.Staff.ToList();
+            // Load all pending requests and staff for the dropdown
+            Requests = _timeOffRepo.GetPendingRequests().ToList();
+            StaffList = _staffRepo.GetAll().ToList();
         }
 
-        public IActionResult OnPost()
+        public IActionResult OnPostApprove(Guid requestId)
         {
-            var request = _context.TimeOffRequests.FirstOrDefault(r => r.Id == RequestId);
-            if (request == null)
+            var req = _timeOffRepo.GetById(requestId);
+            if (req is not null)
+            {
+                req.Approve();
+                _timeOffRepo.Update(req);
+                Message = "Time-off request approved.";
+            }
+            else
             {
                 Message = "Request not found.";
-                OnGet();
-                return Page();
             }
 
-            if (request.Status != TimeOffRequest.RequestStatus.Pending)
+            OnGet();
+            return Page();
+        }
+
+        public IActionResult OnPostReject(Guid requestId)
+        {
+            var req = _timeOffRepo.GetById(requestId);
+            if (req is not null)
             {
-                Message = "This request has already been handled.";
-                OnGet();
-                return Page();
+                req.Deny();
+                _timeOffRepo.Update(req);
+                Message = "Time-off request denied.";
+            }
+            else
+            {
+                Message = "Request not found.";
             }
 
-            if (Action == "Approve")
-            {
-                request.Approve();
-            }
-            else if (Action == "Deny")
-            {
-                request.Deny();
-            }
-
-            _context.SaveChanges();
-            Message = $"Request marked as {request.Status}.";
             OnGet();
             return Page();
         }

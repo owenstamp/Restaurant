@@ -22,5 +22,16 @@ namespace Restaurant.Domain.Entities
             Role = role;
             HireDate = DateTime.UtcNow;
         }
+
+        public void UpdateContactInfo(string email, string phone)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be blank.", nameof(email));
+            if (string.IsNullOrWhiteSpace(phone))
+                throw new ArgumentException("Phone cannot be blank.", nameof(phone));
+
+            Email = email;
+            PhoneNumber = phone;
+        }
     }
 }

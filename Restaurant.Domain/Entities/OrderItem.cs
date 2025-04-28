@@ -4,7 +4,9 @@ namespace Restaurant.Domain.Entities
 {
     public class OrderItem
     {
-        public Guid Id { get; private set; }         // "OrderItemID"
+        public Guid Id { get; private set; }
+        // "OrderItemID"
+        public Guid OrderId { get; set; }
         public Guid MenuItemId { get; private set; } // Link to MenuItems.MenuItemID
         public int Quantity { get; private set; }
         public decimal Price { get; private set; }   // Store snapshot price

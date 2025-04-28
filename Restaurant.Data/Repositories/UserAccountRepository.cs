@@ -22,6 +22,11 @@ namespace Restaurant.Data.Repositories
         {
             return _context.UserAccounts.FirstOrDefault(u => u.Username == username);
         }
+
+
+        public UserAccount GetByStaffId(Guid staffId) =>     // ← NEW IMPLEMENTATION
+            _context.UserAccounts.FirstOrDefault(u => u.StaffId == staffId);
+
         public void Add(UserAccount user)
         {
             _context.UserAccounts.Add(user);

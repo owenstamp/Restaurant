@@ -1,68 +1,92 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Restaurant.Data;
-using Restaurant.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Restaurant.Domain.Entities;
+using Restaurant.Domain.Interfaces;
 
 namespace Restaurant.Web.Pages
 {
     public class KitchenOrdersModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly IOrderRepository _orderRepo;
+        private readonly IMenuItemRepository _menuRepo;
 
-        public KitchenOrdersModel(AppDbContext context)
+        public KitchenOrdersModel(
+            IOrderRepository orderRepo,
+            IMenuItemRepository menuRepo)
         {
-            _context = context;
+            _orderRepo = orderRepo;
+            _menuRepo = menuRepo;
         }
 
-        public List<Order> Orders { get; set; } = new();
+        // DTO for a single ordered item
+        public class ItemDto
+        {
+            public string Name { get; init; }
+            public int Quantity { get; init; }
+        }
+
+        // ViewModel for each order
+        public class OrderWithItems
+        {
+            public Guid Id { get; init; }
+            public DateTime OrderedAt { get; init; }
+            public string Status { get; init; }
+            public List<ItemDto> Items { get; init; }
+        }
+
+        // Exposed to the Razor page
+        public List<OrderWithItems> Orders { get; set; } = new();
         [BindProperty] public Guid OrderId { get; set; }
-        [BindProperty] public string Action { get; set; }
         public string Message { get; set; }
 
-        public Dictionary<Guid, string> MenuItemNames { get; set; } = new();
-
-
+        // GET handler: include both Received & Preparing orders
         public void OnGet()
         {
-            Orders = _context.Orders
-                .Include(o => o.Items)
-                .Where(o => o.Status == Order.OrderStatus.Received || o.Status == Order.OrderStatus.Preparing)
-                .OrderBy(o => o.OrderDateTime)
+            var toShow = _orderRepo
+                .GetAll()
+                .Where(o =>
+                    o.Status == Order.OrderStatus.Received ||
+                    o.Status == Order.OrderStatus.Preparing)
                 .ToList();
-            MenuItemNames = _context.MenuItems
-    .ToDictionary(m => m.Id, m => m.Name);
 
+            Orders = toShow
+                .Select(o =>
+                {
+                    var raw = _orderRepo.GetItemsForOrder(o.Id).ToList();
+                    return new OrderWithItems
+                    {
+                        Id = o.Id,
+                        OrderedAt = o.OrderDateTime,
+                        Status = o.Status.ToString(),
+                        Items = raw
+                            .Select(oi => new ItemDto
+                            {
+                                Name = _menuRepo.GetById(oi.MenuItemId)?.Name ?? "[Unknown]",
+                                Quantity = oi.Quantity
+                            })
+                            .ToList()
+                    };
+                })
+                .ToList();
         }
 
-        public IActionResult OnPost()
+        // POST handler: move to Ready
+        public IActionResult OnPostMarkAsPrepared()
         {
-            var order = _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == OrderId);
-            MenuItemNames = _context.MenuItems
-    .ToDictionary(m => m.Id, m => m.Name);
-
+            var order = _orderRepo.GetById(OrderId);
             if (order == null)
             {
                 Message = "Order not found.";
-                OnGet();
-                return Page();
+            }
+            else
+            {
+                _orderRepo.UpdateOrderStatus(OrderId, Order.OrderStatus.Ready);
+                Message = "Order marked as Ready.";
             }
 
-            if (Action == "Preparing")
-            {
-                order.UpdateStatus(Order.OrderStatus.Preparing);
-                Message = $"Order {order.Id} marked as Preparing.";
-            }
-            else if (Action == "Ready")
-            {
-                order.UpdateStatus(Order.OrderStatus.Ready);
-                Message = $"Order {order.Id} marked as Ready.";
-            }
-
-            _context.SaveChanges();
             OnGet();
             return Page();
         }

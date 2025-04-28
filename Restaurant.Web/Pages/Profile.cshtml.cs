@@ -1,41 +1,75 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
+using Restaurant.Domain.Interfaces;
 using System;
-using System.Linq;
 
 namespace Restaurant.Web.Pages
 {
     public class ProfileModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly IUserAccountRepository _accountRepo;
+        private readonly IStaffRepository _staffRepo;
 
-        public ProfileModel(AppDbContext context)
+        public ProfileModel(
+            IUserAccountRepository accountRepo,
+            IStaffRepository staffRepo)
         {
-            _context = context;
+            _accountRepo = accountRepo;
+            _staffRepo = staffRepo;
         }
 
+        // Exposed to the Razor page
         public UserAccount? User { get; set; }
         public Staff? Staff { get; set; }
+        public string Message { get; set; }
+
+        // Bind only the fields you allow to be updated
+        [BindProperty] public string? Email { get; set; }
+        [BindProperty] public string? PhoneNumber { get; set; }
 
         public IActionResult OnGet()
         {
-            var username = HttpContext.Session.GetString("Username");
-
-            if (string.IsNullOrEmpty(username))
+            var staffIdStr = HttpContext.Session.GetString("StaffId");
+            if (string.IsNullOrEmpty(staffIdStr)
+                || !Guid.TryParse(staffIdStr, out var staffId))
             {
                 return RedirectToPage("/Login");
             }
 
-            User = _context.UserAccounts.FirstOrDefault(u => u.Username == username);
+            // Load via repos
+            User = _accountRepo.GetByStaffId(staffId);
+            Staff = _staffRepo.GetById(staffId);
 
-            if (User != null)
-            {
-                Staff = _context.Staff.FirstOrDefault(s => s.Id == User.StaffId);
-            }
+            if (Staff == null || User == null)
+                return NotFound();
+
+            // Pre-fill bind properties
+            Email = Staff.Email;
+            PhoneNumber = Staff.PhoneNumber;
 
             return Page();
+        }
+
+        public IActionResult OnPostUpdateProfile()
+        {
+            var staffIdStr = HttpContext.Session.GetString("StaffId");
+            if (string.IsNullOrEmpty(staffIdStr)
+                || !Guid.TryParse(staffIdStr, out var staffId))
+            {
+                return RedirectToPage("/Login");
+            }
+
+            var staff = _staffRepo.GetById(staffId);
+            if (staff == null)
+                return NotFound();
+
+            // Apply changes
+            staff.UpdateContactInfo(Email ?? staff.Email, PhoneNumber ?? staff.PhoneNumber);
+            _staffRepo.Update(staff);
+
+            Message = "Profile updated successfully.";
+            return RedirectToPage();
         }
     }
 }

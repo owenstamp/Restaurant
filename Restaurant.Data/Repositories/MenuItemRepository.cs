@@ -22,6 +22,11 @@ namespace Restaurant.Data.Repositories
         {
             return _context.MenuItems.ToList();
         }
+        public IEnumerable<MenuItem> GetAvailableItems()
+        => _context.MenuItems
+             .Where(m => m.IsAvailable)
+             .ToList();
+
         public void Add(MenuItem item)
         {
             _context.MenuItems.Add(item);

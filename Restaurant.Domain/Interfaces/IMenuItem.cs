@@ -8,6 +8,8 @@ namespace Restaurant.Domain.Interfaces
     {
         MenuItem GetById(Guid id);
         IEnumerable<MenuItem> GetAll();
+        IEnumerable<MenuItem> GetAvailableItems();
+
         void Add(MenuItem item);
         void Update(MenuItem item);
 

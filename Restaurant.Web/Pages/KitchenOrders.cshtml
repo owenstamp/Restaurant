@@ -1,71 +1,98 @@
 ﻿@page
-@model KitchenOrdersModel
+@model Restaurant.Web.Pages.KitchenOrdersModel
 @{
     Layout = "_Layout";
-    var role = HttpContext.Session.GetString("UserRole") ?? "";
 }
 
-@if (role != "Manager" && role != "Kitchen")
+<h1>Kitchen Orders</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
 {
-        <h2>Access Denied</h2>
-        <p>You do not have permission to view this page.</p>
-    return;
+    <div class="alert">@Model.Message</div>
 }
 
-<section class="order-status-section">
-    <h2>Kitchen Orders</h2>
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Items (count)</th>
+            <th>Details</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vm in Model.Orders)
+        {
+            <tr>
+                <td>@vm.Id</td>
+                <td>@vm.OrderedAt.ToString("g")</td>
+                <td>@vm.Status</td>
+                <td>@vm.Items.Count</td>
+                <td>
+                    <ul class="item-list">
+                        @foreach (var it in vm.Items)
+                        {
+                            <li>@it.Name × @it.Quantity</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="MarkAsPrepared">
+                        <input type="hidden" name="OrderId" value="@vm.Id" />
+                        <button type="submit" class="btn">Mark Ready</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-    @if (Model.Message != null)
-    {
-            <p class="info">@Model.Message</p>
+<style>
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
     }
 
-    <table class="styled-table">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Items</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model.Orders)
-            {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.OrderDateTime.ToLocalTime().ToString("g")</td>
-                    <td>@order.Status</td>
-                    <td>
-                        <ul>
-                            @foreach (var item in order.Items)
-                            {
-                                <li>
-                                    @item.Quantity x
-                                    @(Model.MenuItemNames.ContainsKey(item.MenuItemId)
-                                        ? Model.MenuItemNames[item.MenuItemId]
-                                        : "Unknown Item")
-                                </li>
-                            }
-                        </ul>
-                    </td>
+        .styled-table th,
+        .styled-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
 
-                    <td>
-                        <form method="post">
-                            <input type="hidden" name="OrderId" value="@order.Id" />
-                            @if (order.Status.ToString() == "Received")
-                            {
-                                    <button name="Action" value="Preparing">Start Preparing</button>
-                            }
-                            else if (order.Status.ToString() == "Preparing")
-                            {
-                                    <button name="Action" value="Ready">Mark Ready</button>
-                            }
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</section>
+        .styled-table thead th {
+            background: #f5f5f5;
+            text-align: left;
+        }
+
+    .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .item-list li {
+            margin: 0.25rem 0;
+        }
+
+    .btn {
+        padding: 0.25rem 0.5rem;
+        border: none;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+    .alert {
+        padding: 0.5rem;
+        background: #e0f7fa;
+        border: 1px solid #4dd0e1;
+        margin-bottom: 1rem;
+    }
+</style>

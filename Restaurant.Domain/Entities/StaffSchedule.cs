@@ -28,5 +28,9 @@ namespace Restaurant.Domain.Entities
             Status = status;
         }
 
+        public void ReassignTo(Guid newStaffId)
+        {
+            StaffId = newStaffId;
+        }
     }
 }

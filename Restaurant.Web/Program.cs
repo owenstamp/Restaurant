@@ -44,7 +44,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession();
-
 app.UseAuthorization();
 
 // Map Razor Pages endpoints (for example; if you add controllers later you can call app.MapControllers())

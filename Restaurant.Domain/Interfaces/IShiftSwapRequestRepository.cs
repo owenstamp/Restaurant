@@ -1,9 +1,14 @@
 ﻿using Restaurant.Domain.Entities;
+using System;
+using System.Collections.Generic;
 
-public interface IShiftSwapRequestRepository
+namespace Restaurant.Domain.Interfaces
 {
-    ShiftSwapRequest GetById(Guid id);
-    void Add(ShiftSwapRequest swapRequest);
-    void Update(ShiftSwapRequest swapRequest);
-    IEnumerable<ShiftSwapRequest> GetPendingSwaps();
+    public interface IShiftSwapRequestRepository
+    {
+        ShiftSwapRequest GetById(Guid id);
+        void Add(ShiftSwapRequest swapRequest);
+        void Update(ShiftSwapRequest swapRequest);
+        IEnumerable<ShiftSwapRequest> GetPendingForStaff(Guid staffId);
+    }
 }

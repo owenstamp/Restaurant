@@ -14,6 +14,9 @@ namespace Restaurant.Data.Repositories
         {
             _context = context;
         }
+
+        public IEnumerable<StaffSchedule> GetAll() =>
+    _context.StaffSchedules.ToList();
         public StaffSchedule GetById(Guid id)
         {
             return _context.StaffSchedules.Find(id);

@@ -29,20 +29,114 @@
     <div id="desktop-drawer" class="drawer">
         <button class="close-btn" onclick="toggleDrawer()">X</button>
         <ul class="drawer-menu">
-            <li><a href="/Index" onclick="closeDrawer()">Home <span class="material-icons">home</span></a></li>
-            <li><a href="/About" onclick="closeDrawer()">About <span class="material-icons">info</span></a></li>
+            @* Updated Customer Links *@
+            <li><a href="/Customer/Index" onclick="closeDrawer()"><span class="material-icons">home</span> Home</a></li>
+            <li><a href="/Customer/About" onclick="closeDrawer()"><span class="material-icons">info</span> About</a></li> @* Assuming About exists and was moved *@
+            <li><a href="/Customer/Contact" onclick="closeDrawer()"><span class="material-icons">contact_mail</span> Contact</a></li> @* Assuming Contact exists and was moved *@
+            <li><a href="/Customer/Menu" onclick="closeDrawer()"><span class="material-icons">restaurant_menu</span> Menu Display</a></li> @* Link to customer menu view *@
+            <li><a href="/Customer/Reservations" onclick="closeDrawer()"><span class="material-icons">event_seat</span> Reservations</a></li> @* Assuming Reservations was moved *@
+
+            <hr style="border-color: rgba(255,255,255,0.1);"> @* Separator *@
+
+            @* Management Sections - Visible only to Managers *@
+            @{
+                var userRole = Context.Session.GetString("UserRole") ?? "";
+                if (userRole == "Manager") // Adjust role name if needed
+                {
+                    <li>
+                        <a href="/StaffDashboard" onclick="closeDrawer()"><span class="material-icons">dashboard</span> Dashboard</a>
+                    </li>
+
+                    <li>
+                        @* Orders Dropdown *@
+                        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                            <span class="material-icons">receipt_long</span> Orders
+                            <span class="material-icons right-icon" style="margin-left: auto;">keyboard_arrow_down</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/orders" onclick="closeDrawer()"><span class="material-icons">add_shopping_cart</span> Create Order</a></li>
+                            <li><a href="/KitchenOrders" onclick="closeDrawer()"><span class="material-icons">kitchen</span> Kitchen View</a></li>
+                            <li><a href="/WaitstaffOrders" onclick="closeDrawer()"><span class="material-icons">room_service</span> Waitstaff View</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        @* Stock Dropdown *@
+                        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                            <span class="material-icons">inventory_2</span> Stock
+                            <span class="material-icons right-icon" style="margin-left: auto;">keyboard_arrow_down</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/Inventory" onclick="closeDrawer()"><span class="material-icons">inventory</span> Inventory Mgt</a></li>
+                            <li><a href="/Suppliers" onclick="closeDrawer()"><span class="material-icons">local_shipping</span> Suppliers</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        @* Staffing Dropdown *@
+                        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                            <span class="material-icons">groups</span> Staffing
+                            <span class="material-icons right-icon" style="margin-left: auto;">keyboard_arrow_down</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/Staff" onclick="closeDrawer()"><span class="material-icons">badge</span> Staff Mgt</a></li>
+                            <li><a href="/ShiftSchedule" onclick="closeDrawer()"><span class="material-icons">calendar_month</span> Shift Schedule</a></li>
+                            <li><a href="/TimeOffRequests" onclick="closeDrawer()"><span class="material-icons">event_busy</span> Time Off Requests</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        @* Reporting Dropdown *@
+                        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                            <span class="material-icons">bar_chart</span> Reporting
+                            <span class="material-icons right-icon" style="margin-left: auto;">keyboard_arrow_down</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/OrderHistory" onclick="closeDrawer()"><span class="material-icons">history</span> Order History</a></li>
+                            @* Add other report links here *@
+                        </ul>
+                    </li>
+
+                    <li>
+                        @* Admin Dropdown *@
+                        <a href="javascript:void(0)" onclick="toggleDropdown(event)">
+                            <span class="material-icons">settings</span> Admin
+                            <span class="material-icons right-icon" style="margin-left: auto;">keyboard_arrow_down</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/menu" onclick="closeDrawer()"><span class="material-icons">edit_note</span> Menu Management</a></li> @* Link to admin menu mgt *@
+                            <li><a href="/Profile" onclick="closeDrawer()"><span class="material-icons">account_circle</span> My Profile</a></li>
+                            @* Add links for User Account Mgt etc. if they exist *@
+                        </ul>
+                    </li>
+                }
+                else if (userRole == "Waitstaff" || userRole == "Kitchen") // Example for other roles
+                {
+                    <li><a href="/StaffDashboard" onclick="closeDrawer()"><span class="material-icons">dashboard</span> Dashboard</a></li>
+                    <li><a href="/Profile" onclick="closeDrawer()"><span class="material-icons">account_circle</span> My Profile</a></li>
+                    @if (userRole == "Waitstaff")
+                    {
+                        <li><a href="/orders" onclick="closeDrawer()"><span class="material-icons">add_shopping_cart</span> Create Order</a></li>
+                        <li><a href="/WaitstaffOrders" onclick="closeDrawer()"><span class="material-icons">room_service</span> My Orders</a></li>
+                    }
+                    @if (userRole == "Kitchen")
+                    {
+                        <li><a href="/KitchenOrders" onclick="closeDrawer()"><span class="material-icons">kitchen</span> Kitchen Orders</a></li>
+                    }
+                }
+            }
+
+            <hr style="border-color: rgba(255,255,255,0.1);"> @* Separator *@
+
+            @* Logout Link *@
             <li>
-                <a href="javascript:void(0)" onclick="toggleDropdown(event)">
-                    Services <span class="material-icons">build</span>
-                    <span class="material-icons right-icon">keyboard_arrow_down</span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a href="/Menu" onclick="closeDrawer()">Menu <span class="material-icons">restaurant_menu</span></a></li>
-                    <li><a href="/Inventory" onclick="closeDrawer()">Inventory <span class="material-icons">inventory</span></a></li>
-                    <li><a href="/Reports" onclick="closeDrawer()">Reports <span class="material-icons">bar_chart</span></a></li>
-                </ul>
+                <form method="post" asp-page="/Logout">
+                    @* Assuming you have a Logout page *@
+                    <button type="submit" class="btn btn-link" style="color: var(--color-text-light); text-decoration: none; padding: 12px 16px; width: 100%; text-align: left; font-weight: 500;">
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 24px; font-size: 20px; opacity: 0.7;">logout</span> Logout
+                    </button>
+                </form>
             </li>
-            <li><a href="/Contact" onclick="closeDrawer()">Contact <span class="material-icons">contact_mail</span></a></li>
         </ul>
     </div>
 
@@ -71,30 +165,92 @@
 
     <!-- Drawer and Dropdown Script -->
     <script>
+                // --- Material Ripple Effect for Buttons ---
+        function createRipple(event) {
+          const button = event.currentTarget;
+
+          // Create ripple element
+          const ripple = document.createElement("span");
+          const diameter = Math.max(button.clientWidth, button.clientHeight);
+          const radius = diameter / 2;
+
+          // Position ripple element
+          ripple.style.width = ripple.style.height = `${diameter}px`;
+          // Calculate click position relative to button
+          const rect = button.getBoundingClientRect();
+          const rippleX = event.clientX - rect.left - radius;
+          const rippleY = event.clientY - rect.top - radius;
+          ripple.style.left = `${rippleX}px`;
+          ripple.style.top = `${rippleY}px`;
+
+          // Add ripple class and append
+          ripple.classList.add("ripple-effect");
+          button.appendChild(ripple);
+
+          // Clean up ripple element after animation
+          ripple.addEventListener('animationend', () => {
+            ripple.remove();
+          });
+        }
+
+        // Add event listener to buttons
+        // Select all button elements and elements with class 'btn'
+        // Ensure the DOM is loaded before adding listeners
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const buttons = document.querySelectorAll("button, .btn");
+            buttons.forEach(button => {
+                // Make sure the button is positioned relatively or absolutely
+                // so the absolute positioned ripple is contained.
+                if (getComputedStyle(button).position === "static") {
+                     button.style.position = "relative";
+                }
+                button.style.overflow = "hidden"; // Hide overflow from ripple
+
+                button.addEventListener("click", createRipple);
+            });
+        });
+
+        // --- End Material Ripple Effect ---
+
+        // Drawer and Dropdown Script (Class-based toggle for animation)
         function toggleDrawer() {
             const drawer = document.getElementById('desktop-drawer');
-            drawer.style.display = drawer.style.display === 'block' ? 'none' : 'block';
+            if (drawer) { // Check if drawer exists
+                drawer.classList.toggle('open'); // Toggle the 'open' class
+            }
         }
 
         function closeDrawer() {
             const drawer = document.getElementById('desktop-drawer');
-            drawer.style.display = 'none';
+             if (drawer) {
+                drawer.classList.remove('open'); // Ensure it closes by removing class
+             }
         }
 
         function toggleDropdown(event) {
             event.preventDefault();
             const link = event.target.closest('a');
             const dropdown = link.nextElementSibling;
-            const icon = link.querySelector(".right-icon");
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-            icon.textContent = dropdown.style.display === 'block' ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+            const icon = link.querySelector(".right-icon"); // Assumes icon exists
+
+            if (dropdown && icon) { // Check if elements exist
+                const isOpen = dropdown.style.display === 'block';
+                dropdown.style.display = isOpen ? 'none' : 'block';
+                icon.textContent = isOpen ? 'keyboard_arrow_down' : 'keyboard_arrow_up';
+            }
         }
 
+        // Improved click outside listener
         window.addEventListener('click', function(e) {
             const drawer = document.getElementById('desktop-drawer');
             const hamburger = document.getElementById('hamburger-menu');
-            if (!drawer.contains(e.target) && !hamburger.contains(e.target)) {
-                drawer.style.display = 'none';
+
+            // Check if drawer and hamburger exist before accessing properties/methods
+            if (drawer && hamburger) {
+                // Close if drawer is open AND click is outside drawer AND outside hamburger
+                if (drawer.classList.contains('open') && !drawer.contains(e.target) && !hamburger.contains(e.target)) {
+                    drawer.classList.remove('open');
+                }
             }
         });
     </script>

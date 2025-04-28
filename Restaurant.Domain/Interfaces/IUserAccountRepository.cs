@@ -6,6 +6,7 @@ namespace Restaurant.Domain.Interfaces
     {
         UserAccount GetById(Guid id);
         UserAccount GetByUsername(string username);
+        UserAccount GetByStaffId(Guid staffId);
         void Add(UserAccount user);
         void Update(UserAccount user);
     }

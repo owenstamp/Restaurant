@@ -15,6 +15,7 @@ namespace Restaurant.Domain.Interfaces
         StaffSchedule GetById(Guid id);
         void Add(StaffSchedule schedule);
         void Update(StaffSchedule schedule);
+        IEnumerable<StaffSchedule> GetAll();
         IEnumerable<StaffSchedule> GetByStaffId(Guid staffId);
     }
 }

@@ -1,55 +1,43 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Restaurant.Domain.Interfaces;
 
 namespace Restaurant.Web.Pages
 {
     public class SuppliersModel : PageModel
     {
-        private readonly AppDbContext _context;
-
-        public SuppliersModel(AppDbContext context)
+        private readonly ISupplierRepository _repo;
+        public SuppliersModel(ISupplierRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
-        [BindProperty]
-        public string SupplierName { get; set; }
-
-        [BindProperty]
-        public string ContactInfo { get; set; }
-
-        [BindProperty]
-        public string ProductTypes { get; set; }
-
         public List<Supplier> Suppliers { get; set; } = new();
-
+        [BindProperty] public string SupplierName { get; set; }
+        [BindProperty] public string ContactInfo { get; set; }
+        [BindProperty] public string ProductTypes { get; set; }
         public string Message { get; set; }
 
         public void OnGet()
         {
-            Suppliers = _context.Suppliers.ToList();
+            Suppliers = _repo.GetAll().ToList();
         }
 
         public IActionResult OnPost()
         {
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(SupplierName))
+            if (string.IsNullOrWhiteSpace(SupplierName))
             {
-                Message = "Please fill in all required fields.";
-                Suppliers = _context.Suppliers.ToList();
+                Message = "Name can’t be blank.";
+                OnGet();
                 return Page();
             }
 
-            var newSupplier = new Supplier(SupplierName, ContactInfo, ProductTypes);
-            _context.Suppliers.Add(newSupplier);
-            _context.SaveChanges();
+            var supplier = new Supplier(SupplierName, ContactInfo, ProductTypes);
 
-            Message = "Supplier added successfully.";
-            Suppliers = _context.Suppliers.ToList();
+            _repo.Add(supplier);
+            Message = "Supplier added!";
+            OnGet();
             return Page();
         }
     }

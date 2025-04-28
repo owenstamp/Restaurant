@@ -1,201 +1,88 @@
-﻿bod /* General Body Styles */
-body, html {
-    font-family: 'Jost', sans-serif !important;
+﻿/* === New Color Palette Variables === */
+:root {
+    --color-primary: #5271ff;
+    --color-secondary: #38b6ff;
+    --color-accent: #5ce1e6;
+    --color-neutral-light: #e2e2e2;
+    --color-neutral-medium: #ccc; /* Added for slightly darker borders/dividers if needed */
+    --color-neutral-dark: #888; /* Added for secondary text or icons */
+    --color-dark: #343a40; /* Standard dark color for backgrounds like nav/drawer */
+    --color-text-light: #ffffff;
+    --color-text-dark: #333333; /* Standard dark text */
+    /* Derived hover/active states (adjust darkness as needed) */
+    --color-primary-darker: #3a5ae0;
+    --color-secondary-darker: #1f9ae0;
+    --color-dark-lighter: #495057; /* Hover for dark elements */
+    /* Status Colors */
+    --color-success: var(--color-secondary); /* Using secondary blue for Success */
+    --color-info: var(--color-accent); /* Using accent cyan for Info */
+    --color-warning: #ffc107; /* Standard Yellow/Orange */
+    --color-danger: #dc3545; /* Standard Red */
+    /* Status Text Colors (for contrast on status backgrounds) */
+    --color-success-text: var(--color-text-light); /* White text on secondary blue */
+    --color-info-text: #005662; /* Dark cyan text on light info background */
+    --color-warning-text: #664d03; /* Dark text on warning background */
+    --color-danger-text: #58151c; /* Dark text on danger background */
+    /* Status Background Colors (lighter variants for alerts) */
+    --color-success-bg: #e8f7ff; /* Light version of secondary blue */
+    --color-info-bg: #f0fdfe; /* Light version of accent */
+    --color-warning-bg: #fff3cd; /* Light version of warning */
+    --color-danger-bg: #f8d7da; /* Light version of danger */
+}
+
+
+/* === Base Styles === */
+html, body {
+    font-family: 'Jost', sans-serif !important; /* Ensure font is applied */
+}
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
     margin: 0;
-    font-family: 'Jost', sans-serif;
-    background-color: #f9f9f9;
+    padding-top: 60px; /* Added padding to offset fixed toolbar */
+    margin-bottom: 60px; /* Assuming footer/bottom-nav height */
+    background-color: #f9f9f9; /* Light grey background from new rules */
+    color: var(--color-text-dark);
 }
 
-/* Material Toolbar */
-.toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #6200ea; /* Purple background */
-    color: white;
-    padding: 10px 0px;
-    box-shadow: 0 4px 2px -2px gray;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    flex-wrap: wrap; /* Allow items to wrap if there is not enough space */
+/* Updated focus ring to use primary color */
+/* Applied only to elements that NEED focus rings, avoid on base button */
+a:focus, input:focus, textarea:focus, select:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--color-primary);
+    outline: none;
+}
+/* Specific focus for buttons using slight shadow change */
+button:focus, .btn:focus {
+    box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2);
+    outline: none;
 }
 
-    .toolbar .logo {
-        font-size: 24px;
-        font-weight: bold;
-        margin-right: 50px; /* Ensure there’s space between logo and menu */
-    }
 
-    .toolbar .menu-items {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap; /* Allow items to wrap in smaller screens */
-        margin-left: auto; /* Push items to the right */
-    }
-
-        .toolbar .menu-items a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-size: 16px;
-        }
-
-            .toolbar .menu-items a:hover {
-                text-decoration: underline;
-            }
-
-/* Hamburger Menu - Always Visible */
-.menu-toggle {
-    display: block; /* Always show the hamburger menu */
-    cursor: pointer;
-}
-
-    .menu-toggle .material-icons {
-        font-size: 30px;
-    }
-
-/* Desktop Drawer Styles */
-.drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    background-color: #333;
-    display: none; /* Initially hidden */
-    padding-top: 60px;
-    z-index: 1000;
-    color: white;
-    padding: 10px;
-}
-
-.drawer-menu {
-    list-style-type: none;
-    padding: 0;
-}
-
-    .drawer-menu li {
-        padding: 15px;
-    }
-
-    .drawer-menu a {
-        text-decoration: none;
-        color: white;
-        display: block;
-    }
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #333;
-    color: white;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 5px 10px;
-}
-
-    .close-btn:hover {
-        background-color: #555;
-    }
-
-/* Dropdown Menu for Services */
-.dropdown-menu {
-    list-style-type: none;
-    padding: 0;
-    display: none;
-    background-color: #444;
-}
-
-    .dropdown-menu li {
-        padding: 10px 15px;
-    }
-
-    .dropdown-menu a {
-        color: white;
-        text-decoration: none;
-    }
-
-/* Bottom Navigation Bar (for mobile) */
-.bottom-nav {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: #333;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    z-index: 1000;
-}
-
-.tab-item {
-    color: white;
-    text-align: center;
+a {
+    color: var(--color-primary);
     text-decoration: none;
-    flex-grow: 1;
 }
 
-    .tab-item span {
-        display: block;
+    a:hover {
+        color: var(--color-primary-darker);
+        text-decoration: underline;
     }
-
-/* Responsive Design for Mobile Screens */
-@media (max-width: 768px) {
-    .bottom-nav {
-        display: flex;
-    }
-
-    #desktop-drawer {
-        display: none; /* Hide the drawer on mobile */
-    }
-
-    .toolbar .menu-items {
-        display: none; /* Hide menu links on mobile */
-    }
-
-    /* Ensure the hamburger menu icon is always visible */
-    .menu-toggle {
-        display: block; /* Always show the hamburger menu on mobile */
-    }
-}
-
-/* Desktop (769px and above) */
-@media (min-width: 769px) {
-    .bottom-nav {
-        display: none; /* Hide bottom nav on desktop */
-    }
-
-    #desktop-drawer {
-        display: block; /* Show the drawer on desktop */
-    }
-
-    .toolbar .menu-items {
-        display: flex; /* Show menu items on desktop */
-        justify-content: flex-end; /* Align items to the right */
-        margin-left: auto;
-    }
-}
-
-/* Reservations Page Styles */
-.container {
-    max-width: 500px;
-    margin: 50px auto;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
 
 h2 {
     text-align: center;
     margin-bottom: 1.5rem;
+    color: var(--color-dark); /* Give headings a color */
 }
 
 label {
@@ -203,131 +90,634 @@ label {
     margin-top: 10px;
     margin-bottom: 5px;
     font-weight: bold;
+    color: var(--color-text-dark);
 }
 
-input, textarea {
+/* Default Input/Textarea Styles */
+input, textarea, select {
     width: 100%;
     padding: 10px;
     margin-bottom: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-neutral-medium); /* Using medium neutral */
     border-radius: 5px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #2c3e50;
-    color: white;
+/* --- Material Design Button Style (Applied to 'button' tag and '.btn' class) --- */
+button, .btn {
+    position: relative; /* Needed for ripple positioning */
+    overflow: hidden; /* Needed to contain ripple */
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
     border: none;
-    border-radius: 5px;
-    font-size: 1rem;
+    padding: 8px 16px; /* Material padding */
+    border-radius: 4px; /* Material radius */
+    font-size: 0.875rem; /* Typical Material size */
+    font-weight: 600; /* Material weight */
+    text-transform: uppercase; /* Material text */
+    letter-spacing: 0.05em; /* Material spacing */
     cursor: pointer;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    width: auto;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2); /* Resting shadow */
+    outline: none; /* Remove default outline */
 }
 
-    button:hover {
-        background-color: #34495e;
+    button:hover, .btn:hover {
+        background-color: var(--color-primary-darker);
+        color: var(--color-text-light);
+        box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); /* Hover shadow */
     }
-/* General Layout for Views with Filters */
-.view-container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 2rem;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    button:active, .btn:active {
+        box-shadow: none; /* Flatten on active/click */
+    }
+
+/* --- Ripple Effect Styles --- */
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.6); /* Ripple color */
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none; /* Prevent ripple from interfering with clicks */
 }
 
-    /* Title/Heading */
-    .view-container h2 {
-        text-align: center;
-        margin-bottom: 1.5rem;
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
     }
+}
 
-/* Filter Section */
-.filter-section {
+/* --- Material Toolbar --- */
+.toolbar {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
-    gap: 15px; /* Space between filters */
+    align-items: center;
+    background-color: var(--color-primary); /* Using Primary Color */
+    color: var(--color-text-light);
+    padding: 10px 20px; /* Added horizontal padding */
+    box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); /* Material shadow */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0; /* Ensure it spans full width */
+    z-index: 1000;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+    .toolbar .logo {
+        font-size: 1.25rem; /* Material title size */
+        font-weight: 500; /* Material title weight */
+        margin-right: 20px;
+    }
+
+    .toolbar .menu-items {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-left: auto; /* Push items to the right */
+    }
+
+        .toolbar .menu-items a {
+            color: var(--color-text-light);
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 0.875rem; /* Match button size */
+            font-weight: 500; /* Match button weight */
+            text-transform: uppercase; /* Match button text */
+            padding: 8px 0; /* Add some vertical padding */
+        }
+
+            .toolbar .menu-items a:hover {
+                text-decoration: none; /* Remove underline */
+                opacity: 0.8; /* Slight fade on hover */
+            }
+
+/* --- Hamburger Menu --- */
+.menu-toggle {
+    display: block;
+    cursor: pointer;
+    color: var(--color-text-light);
+    background: none;
+    border: none;
+    padding: 8px; /* Consistent padding */
+    border-radius: 50%; /* Make it round */
+}
+
+    .menu-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1); /* Subtle hover */
+    }
+
+    .menu-toggle .material-icons {
+        font-size: 24px; /* Standard icon size */
+        vertical-align: middle;
+    }
+
+/* --- Desktop Drawer Styles (Using left/transition for animation) --- */
+.drawer {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Start off-screen */
+    height: 100vh; /* Use viewport height */
+    width: 250px;
+    background-color: var(--color-dark); /* Dark background */
+    /* padding-top: 60px; /* Remove padding-top, handled by position */
+    z-index: 1001; /* Above toolbar overlay maybe? or keep 999 */
+    color: var(--color-text-light);
+    padding: 0; /* Remove padding, apply to inner elements */
+    box-sizing: border-box;
+    transition: left 0.3s ease-in-out; /* The animation */
+    box-shadow: 0 8px 10px -5px rgba(0,0,0,0.2), 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12); /* Material drawer shadow */
+    display: block; /* Needs to be block for positioning/transition */
+    overflow-y: auto; /* Ensure vertical scrolling */
+}
+
+    .drawer.open {
+        left: 0; /* Slide in when .open class is present */
+    }
+
+.drawer-menu {
+    list-style-type: none;
+    padding: 8px 0; /* Add padding top/bottom */
+    margin: 0;
+}
+
+    .drawer-menu li {
+        padding: 0;
+    }
+
+    .drawer-menu a {
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.87); /* Slightly less bright text */
+        display: flex; /* Use flex for alignment */
+        align-items: center;
+        padding: 12px 16px; /* Adjusted padding */
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+    }
+
+        .drawer-menu a .material-icons { /* Style icons in drawer */
+            margin-right: 24px;
+            font-size: 20px;
+            opacity: 0.7;
+        }
+
+        .drawer-menu a:hover {
+            background-color: var(--color-dark-lighter);
+            text-decoration: none;
+        }
+
+        .drawer-menu a.active { /* Style for active link */
+            background-color: var(--color-primary);
+            color: var(--color-text-light);
+        }
+
+            .drawer-menu a.active .material-icons {
+                opacity: 1;
+            }
+
+.drawer .close-btn {
+    position: absolute;
+    top: 8px; /* Align better with padding */
+    right: 8px;
+    background-color: transparent;
+    color: var(--color-neutral-dark);
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    line-height: 1;
+    border-radius: 50%;
+}
+
+    .drawer .close-btn:hover {
+        color: var(--color-text-light);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* --- Dropdown Menu (Inside Drawer) --- */
+.dropdown-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: none;
+    background-color: transparent; /* Don't need different background */
+}
+
+    .dropdown-menu li {
+        padding: 0;
+    }
+
+    .dropdown-menu a {
+        padding: 12px 16px 12px 40px; /* Indented padding */
+        font-size: 0.875rem;
+        font-weight: 400; /* Normal weight for sub-items */
+    }
+
+        .dropdown-menu a .material-icons {
+            margin-right: 16px; /* Adjust icon spacing */
+            font-size: 18px;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: var(--color-dark-lighter);
+        }
+
+        .dropdown-menu a.active {
+            background-color: var(--color-primary);
+            color: var(--color-text-light);
+        }
+
+
+/* --- Bottom Navigation Bar (Mobile) --- */
+.bottom-nav {
+    display: none; /* Hidden by default */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-dark);
+    justify-content: space-around;
+    padding: 0; /* Remove padding, handle in items */
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    height: 56px; /* Material standard height */
+}
+
+.tab-item {
+    color: var(--color-neutral-dark);
+    text-align: center;
+    text-decoration: none;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 0 10px 0; /* Adjust padding */
+    font-size: 0.75rem; /* Material label size */
+    transition: color 0.2s ease;
+    min-width: 80px; /* Min width for tabs */
+    max-width: 168px; /* Max width */
+}
+
+    .tab-item span.material-icons { /* Icon */
+        display: block;
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+
+    .tab-item span:not(.material-icons) { /* Text Label */
+        display: block;
+    }
+
+    .tab-item.active,
+    .tab-item:hover {
+        color: var(--color-primary);
+        text-decoration: none;
+    }
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) { /* Mobile */
+    body {
+        padding-bottom: 56px; /* Match bottom nav height */
+    }
+
+    .bottom-nav {
+        display: flex;
+    }
+    /* Hide animated drawer on mobile if using bottom nav instead */
+    .drawer {
+        display: none !important; /* Ensure it's hidden */
+    }
+
+    #desktop-drawer { /* Rule from user HTML ID */
+        display: none !important;
+    }
+
+    .toolbar .menu-items {
+        display: none; /* Hide desktop menu links */
+    }
+
+    .menu-toggle {
+        display: block; /* Ensure hamburger is shown */
+    }
+}
+
+@media (min-width: 769px) { /* Desktop */
+    body {
+        padding-bottom: 0; /* No bottom padding needed */
+    }
+
+    .bottom-nav {
+        display: none; /* Hide bottom nav */
+    }
+
+    .toolbar .menu-items {
+        display: flex; /* Show desktop menu items */
+    }
+    /* Drawer starts hidden via left: -250px */
+}
+
+/* --- Container Styles --- */
+.container, .view-container {
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px; /* Slight adjustment to radius */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* Material-like shadow */
+}
+
+.container {
+    max-width: 500px;
+}
+
+/* --- Filter Section --- */
+.filter-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
 }
 
     .filter-section label {
         font-weight: bold;
-        margin-right: 10px;
+        margin-right: 5px;
+        margin-bottom: 0;
+        margin-top: 0;
     }
 
     .filter-section input,
-    .filter-section select,
-    .filter-section button {
-        width: auto; /* Keep the elements' width from being full width */
+    .filter-section select {
+        width: auto;
         padding: 8px 12px;
         border-radius: 5px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--color-neutral-medium);
         font-size: 1rem;
+        margin-bottom: 0;
+        flex-grow: 1;
     }
 
     .filter-section button {
-        background-color: #2c3e50;
-        color: white;
-        cursor: pointer;
+        /* Inherits base Material button style */
+        padding: 8px 12px; /* Keep specific smaller padding */
     }
 
-        .filter-section button:hover {
-            background-color: #34495e;
-        }
-
-/* Tables or Lists to Display Filtered Data */
+/* --- Table Styles --- */
 .table-container {
     width: 100%;
-    margin-top: 2rem;
+    margin-top: 1rem;
     overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    background-color: white;
 }
 
     table th,
     table td {
-        padding: 12px;
+        padding: 12px 16px; /* Adjusted padding */
         text-align: left;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid var(--color-neutral-light); /* Use bottom border only */
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        vertical-align: middle;
     }
 
     table th {
-        background-color: #2c3e50;
-        color: white;
+        background-color: white; /* Keep header white */
+        color: var(--color-text-dark); /* Dark text */
+        font-weight: 600;
+        border-bottom-width: 2px; /* Thicker bottom border on header */
+        border-bottom-color: var(--color-neutral-medium);
     }
 
-    table tr:hover {
-        background-color: #f4f4f4;
+    table tbody tr:hover {
+        background-color: #f5f5f5; /* Standard hover grey */
     }
 
-/* Pagination for Tables */
+/* --- Pagination Styles --- */
+/* Keeping pagination distinct, not using Material buttons */
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    padding-left: 0;
+    list-style: none;
 }
 
-    .pagination button {
+    .pagination button, .pagination span {
         padding: 8px 15px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-neutral-medium);
         border-radius: 5px;
-        background-color: #f1f1f1;
+        background-color: white;
+        color: var(--color-primary);
         cursor: pointer;
         margin: 0 5px;
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
 
         .pagination button:hover {
-            background-color: #2c3e50;
-            color: white;
+            background-color: var(--color-primary-darker);
+            color: var(--color-text-light);
+            border-color: var(--color-primary-darker);
         }
 
-    .pagination .active {
-        background-color: #2c3e50;
-        color: white;
+    .pagination .active button, .pagination .active span {
+        background-color: var(--color-primary);
+        color: var(--color-text-light);
+        border-color: var(--color-primary);
+        cursor: default;
     }
+
+    .pagination .disabled button, .pagination .disabled span {
+        color: var(--color-neutral-dark);
+        pointer-events: none;
+        cursor: default;
+        background-color: #f8f9fa;
+        border-color: var(--color-neutral-light);
+    }
+
+
+/* === Status Alert Styles === */
+.alert {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 4px; /* Adjusted radius */
+    /* border-left-width: 5px; /* Removed left border */
+}
+    /* Add icons to alerts */
+    .alert::before {
+        font-family: 'Material Icons';
+        margin-right: 0.5rem;
+        vertical-align: middle;
+        font-size: 1.25rem;
+    }
+
+.alert-success::before {
+    content: 'check_circle';
+}
+
+.alert-info::before {
+    content: 'info';
+}
+
+.alert-warning::before {
+    content: 'warning';
+}
+
+.alert-danger::before {
+    content: 'error';
+}
+
+.alert-success {
+    color: var(--color-success-text);
+    background-color: var(--color-success-bg);
+    border-color: var(--color-success);
+}
+
+.alert-info {
+    color: var(--color-info-text);
+    background-color: var(--color-info-bg);
+    border-color: var(--color-info);
+}
+
+.alert-warning {
+    color: var(--color-warning-text);
+    background-color: var(--color-warning-bg);
+    border-color: var(--color-warning);
+}
+
+.alert-danger {
+    color: var(--color-danger-text);
+    background-color: var(--color-danger-bg);
+    border-color: var(--color-danger);
+}
+
+/* Login Form Specific overrides */
+.login-section {
+    max-width: 400px;
+    margin: 3rem auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.login-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.login-form button {
+    width: 100%;
+    /* Removed specific padding - uses default Material padding now */
+}
+
+.error {
+    color: var(--color-danger);
+    margin-top: 1rem;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+
+/* Supplier Section Specific overrides */
+.supplier-section {
+    max-width: 800px;
+}
+
+.supplier-form {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.supplier-section .info {
+    color: var(--color-info); /* Use info color */
+    font-weight: 500;
+}
+
+
+/* Modal Styles (Example - needs JS change for class toggle) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    display: none;
+}
+
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 1.5rem 2rem;
+    width: 60%;
+    max-width: 600px;
+    border-radius: 8px;
+    z-index: 1051;
+    display: none;
+    box-shadow: 0 11px 15px -7px rgba(0,0,0,0.2), 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12); /* Material Dialog shadow */
+}
+
+    .modal-overlay.open, .modal-content.open {
+        display: block;
+    }
+
+    .modal-content .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--color-neutral-dark);
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+
+        .modal-content .close-btn:hover {
+            color: var(--color-text-dark);
+        }
+
+/* Item List */
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .item-list li {
+        margin: 0; /* Remove margin */
+        padding: 0.5rem 0; /* Adjust padding */
+        border-bottom: 1px solid var(--color-neutral-light);
+    }
+
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+
+
+/* === Add any other specific page/component overrides below === */

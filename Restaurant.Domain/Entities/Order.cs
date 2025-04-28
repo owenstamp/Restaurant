@@ -9,7 +9,7 @@ namespace Restaurant.Domain.Entities
         public Guid? ReservationId { get; private set; } // If linked to a Reservation, else null
         public Guid WaitstaffId { get; private set; }    // Waitstaff → Staff.StaffID
         public DateTime OrderDateTime { get; private set; }
-        public decimal TotalAmount { get; private set; }
+        public decimal TotalAmount { get; internal set; }
         public OrderStatus Status { get; private set; }
 
         // Keep a collection of OrderItems
@@ -42,7 +42,7 @@ namespace Restaurant.Domain.Entities
         }
 
         // Example domain rule: recalc total
-        private void RecalculateTotal()
+        public void RecalculateTotal()
         {
             decimal sum = 0;
             foreach (var item in _items)

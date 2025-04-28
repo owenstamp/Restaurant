@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Restaurant.Data;
 using Restaurant.Domain.Entities;
+using Restaurant.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,49 +10,61 @@ namespace Restaurant.Web.Pages
 {
     public class WaitstaffOrdersModel : PageModel
     {
-        private readonly AppDbContext _context;
+        private readonly IOrderRepository _orderRepo;
+        private readonly IMenuItemRepository _menuRepo;
 
-        public WaitstaffOrdersModel(AppDbContext context)
+        public WaitstaffOrdersModel(IOrderRepository orderRepo, IMenuItemRepository menuRepo)
         {
-            _context = context;
+            _orderRepo = orderRepo;
+            _menuRepo = menuRepo;
         }
 
+        // Orders ready to be served
         public List<Order> Orders { get; set; } = new();
+
         [BindProperty] public Guid OrderId { get; set; }
-        [BindProperty] public string Action { get; set; }
+        [BindProperty] public string Action { get; set; }  // e.g. "Serve"
         public Dictionary<Guid, string> MenuItemNames { get; set; } = new();
         public string Message { get; set; }
 
         public void OnGet()
         {
-            Orders = _context.Orders
-                .Include(o => o.Items)
+            // 1) Load all orders in "Ready" status
+            Orders = _orderRepo
+                .GetAll()
                 .Where(o => o.Status == Order.OrderStatus.Ready)
-                .OrderBy(o => o.OrderDateTime)
                 .ToList();
 
-            MenuItemNames = _context.MenuItems
-                .ToDictionary(m => m.Id, m => m.Name);
+            // 2) Build lookup for item names
+            var itemIds = Orders.SelectMany(o => o.Items)
+                                .Select(i => i.MenuItemId)
+                                .Distinct();
+
+            MenuItemNames = itemIds.ToDictionary(
+                id => id,
+                id => _menuRepo.GetById(id)?.Name ?? "[Unknown]"
+            );
         }
 
         public IActionResult OnPost()
         {
-            var order = _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == OrderId);
-            if (order == null)
+            // Mark as served if requested
+            if (Action == "Served" && OrderId != Guid.Empty)
             {
-                Message = "Order not found.";
-                OnGet();
-                return Page();
+                var order = _orderRepo.GetById(OrderId);
+                if (order != null)
+                {
+                    _orderRepo.UpdateOrderStatus(OrderId, Order.OrderStatus.Served);
+                    Message = "Order served successfully.";
+                }
+                else
+                {
+                    Message = "Order not found.";
+                }
             }
 
-            if (Action == "Served")
-            {
-                order.UpdateStatus(Order.OrderStatus.Served);
-                Message = $"Order {order.Id} marked as Served.";
-                _context.SaveChanges();
-            }
-
-            OnGet(); // Refresh view
+            // Refresh the list
+            OnGet();
             return Page();
         }
     }
