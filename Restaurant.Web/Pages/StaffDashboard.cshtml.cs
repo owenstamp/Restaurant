@@ -242,12 +242,14 @@ namespace Restaurant.Web.Pages
             CalendarEventsJson = JsonSerializer.Serialize(AllShifts.Select(shift =>
             {
                 var staff = StaffList.FirstOrDefault(s => s.Id == shift.StaffId);
+                var eventColor = shift.Status == StaffSchedule.ShiftStatus.TimeOff ? "#FFA07A" : "#3788d8";
                 return new
                 {
                     title = $"{staff?.FirstName} {staff?.LastName} ({staff?.Role})",
                     start = $"{shift.ShiftDate:yyyy-MM-dd}T{shift.ShiftStartTime}",
                     end = $"{shift.ShiftDate:yyyy-MM-dd}T{shift.ShiftEndTime}",
-                    allDay = false
+                    
+                allDay = false, color = eventColor
                 };
             }));
         }

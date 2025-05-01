@@ -4,6 +4,7 @@ using System.Linq;
 using Restaurant.Domain.Entities;
 using Restaurant.Domain.Interfaces;
 using Restaurant.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Restaurant.Data.Repositories
 {
@@ -34,7 +35,11 @@ namespace Restaurant.Data.Repositories
         }
         public IEnumerable<TimeOffRequest> GetPendingRequests()
         {
-            return _context.TimeOffRequests.Where(r => r.Status == TimeOffRequest.RequestStatus.Pending).ToList();
+            return _context.TimeOffRequests
+                           .AsNoTracking()
+                           .Where(r => r.Status == TimeOffRequest.RequestStatus.Pending)
+                           .ToList();
         }
+
     }
 }

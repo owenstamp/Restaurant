@@ -5,6 +5,7 @@ using Restaurant.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Restaurant.Web.Pages
 {
@@ -12,13 +13,15 @@ namespace Restaurant.Web.Pages
     {
         private readonly ITimeOffRequestRepository _timeOffRepo;
         private readonly IStaffRepository _staffRepo;
-
+        private readonly IStaffScheduleRepository _StaffScheduleRepo;
         public TimeOffRequestsModel(
             ITimeOffRequestRepository timeOffRepo,
-            IStaffRepository staffRepo)
+            IStaffRepository staffRepo,
+            IStaffScheduleRepository StaffScheduleRepo)
         {
             _timeOffRepo = timeOffRepo;
             _staffRepo = staffRepo;
+            _StaffScheduleRepo = StaffScheduleRepo;
         }
 
         public List<TimeOffRequest> Requests { get; set; } = new();
@@ -31,23 +34,33 @@ namespace Restaurant.Web.Pages
             Requests = _timeOffRepo.GetPendingRequests().ToList();
             StaffList = _staffRepo.GetAll().ToList();
         }
-
         public IActionResult OnPostApprove(Guid requestId)
         {
             var req = _timeOffRepo.GetById(requestId);
             if (req is not null)
             {
                 req.Approve();
-                _timeOffRepo.Update(req);
-                Message = "Time-off request approved.";
+                _timeOffRepo.Update(req);  // This calls SaveChanges and should persist the new status
+
+                // Create a time off shift (for a single day; add a loop for multi?day)
+                var timeOffShift = new StaffSchedule(
+                    req.StaffId,
+                    req.StartDate.Date,
+                    new TimeSpan(0, 0, 0),
+                    new TimeSpan(23, 59, 59),
+                    StaffSchedule.ShiftStatus.TimeOff
+                );
+                _StaffScheduleRepo.Add(timeOffShift);
+
+                TempData["SuccessMessage"] = "Time-off request approved.";
             }
             else
             {
-                Message = "Request not found.";
+                TempData["ErrorMessage"] = "Request not found.";
             }
 
-            OnGet();
-            return Page();
+            // Return a redirect so that a fresh instance of the page is loaded.
+            return RedirectToPage();
         }
 
         public IActionResult OnPostReject(Guid requestId)
@@ -57,15 +70,19 @@ namespace Restaurant.Web.Pages
             {
                 req.Deny();
                 _timeOffRepo.Update(req);
-                Message = "Time-off request denied.";
+                TempData["SuccessMessage"] = "Time-off request denied.";
             }
             else
             {
-                Message = "Request not found.";
+                TempData["ErrorMessage"] = "Request not found.";
             }
 
-            OnGet();
-            return Page();
+            return RedirectToPage();
         }
+
+
+
+
+
     }
 }
