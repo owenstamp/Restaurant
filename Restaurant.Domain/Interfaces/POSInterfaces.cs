@@ -2,6 +2,9 @@
 
 namespace Restaurant.Domain.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IPaymentRepository
     {
         Payment GetById(Guid id);
@@ -10,6 +13,9 @@ namespace Restaurant.Domain.Interfaces
         IEnumerable<Payment> GetByOrderId(Guid orderId);
     }
 
+    /// <summary>
+    ///     
+    /// </summary>
     public interface IPOSLogRepository
     {
         POSLog GetById(Guid id);

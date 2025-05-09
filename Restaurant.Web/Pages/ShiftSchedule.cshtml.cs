@@ -8,11 +8,26 @@ using System.Linq;
 
 namespace Restaurant.Web.Pages
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.RazorPages.PageModel" />
     public class ShiftScheduleModel : PageModel
     {
+        /// <summary>
+        /// The schedule repo
+        /// </summary>
         private readonly IStaffScheduleRepository _scheduleRepo;
+        /// <summary>
+        /// The staff repo
+        /// </summary>
         private readonly IStaffRepository _staffRepo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShiftScheduleModel"/> class.
+        /// </summary>
+        /// <param name="scheduleRepo">The schedule repo.</param>
+        /// <param name="staffRepo">The staff repo.</param>
         public ShiftScheduleModel(
             IStaffScheduleRepository scheduleRepo,
             IStaffRepository staffRepo)
@@ -21,14 +36,59 @@ namespace Restaurant.Web.Pages
             _staffRepo = staffRepo;
         }
 
+        /// <summary>
+        /// Gets or sets the staff list.
+        /// </summary>
+        /// <value>
+        /// The staff list.
+        /// </value>
         public List<Staff> StaffList { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the staff identifier.
+        /// </summary>
+        /// <value>
+        /// The staff identifier.
+        /// </value>
         [BindProperty] public Guid StaffId { get; set; }
+        /// <summary>
+        /// Gets or sets the shift date.
+        /// </summary>
+        /// <value>
+        /// The shift date.
+        /// </value>
         [BindProperty] public DateTime ShiftDate { get; set; }
+        /// <summary>
+        /// Gets or sets the shift start time.
+        /// </summary>
+        /// <value>
+        /// The shift start time.
+        /// </value>
         [BindProperty] public TimeSpan ShiftStartTime { get; set; }
+        /// <summary>
+        /// Gets or sets the shift end time.
+        /// </summary>
+        /// <value>
+        /// The shift end time.
+        /// </value>
         [BindProperty] public TimeSpan ShiftEndTime { get; set; }
+        /// <summary>
+        /// Gets or sets the shifts.
+        /// </summary>
+        /// <value>
+        /// The shifts.
+        /// </value>
         public List<StaffSchedule> Shifts { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>
+        /// The message.
+        /// </value>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Called when [get].
+        /// </summary>
         public void OnGet()
         {
             // Load staff dropdown
@@ -45,6 +105,10 @@ namespace Restaurant.Web.Pages
             }
         }
 
+        /// <summary>
+        /// Called when [post].
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPost()
         {
             // Basic validation

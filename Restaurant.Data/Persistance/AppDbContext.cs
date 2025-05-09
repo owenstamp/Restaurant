@@ -20,7 +20,6 @@ namespace Restaurant.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<POSLog> POSLogs { get; set; }
         public DbSet<UserAccount> UserAccounts { get; set; }
-        public DbSet<Feedback> Feedback { get; set; }
         public DbSet<TimeOffRequest> TimeOffRequests { get; set; }
         public DbSet<ShiftSwapRequest> ShiftSwapRequests { get; set; }
 

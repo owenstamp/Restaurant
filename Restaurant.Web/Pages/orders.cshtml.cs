@@ -10,16 +10,34 @@ using System.Threading.Tasks;
 
 namespace Restaurant.Web.Pages
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.RazorPages.PageModel" />
     public class OrdersModel : PageModel
     {
+        /// <summary>
+        /// The order repo
+        /// </summary>
         private readonly IOrderRepository _orderRepo;
+        /// <summary>
+        /// The menu repo
+        /// </summary>
         private readonly IMenuItemRepository _menuRepo;
         // REMOVED: IHttpContextAccessor dependency
 
         // Session Key constant remains the same
+        /// <summary>
+        /// The session key current order identifier
+        /// </summary>
         private const string SessionKeyCurrentOrderId = "_CurrentOrderId";
 
         // Constructor updated - no longer needs IHttpContextAccessor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrdersModel"/> class.
+        /// </summary>
+        /// <param name="orderRepo">The order repo.</param>
+        /// <param name="menuRepo">The menu repo.</param>
         public OrdersModel(IOrderRepository orderRepo, IMenuItemRepository menuRepo)
         {
             _orderRepo = orderRepo;
@@ -28,36 +46,136 @@ namespace Restaurant.Web.Pages
         }
 
         // Properties for the "Add Item" form
+        /// <summary>
+        /// Gets or sets the menu item identifier.
+        /// </summary>
+        /// <value>
+        /// The menu item identifier.
+        /// </value>
         [BindProperty] public Guid MenuItemId { get; set; }
+        /// <summary>
+        /// Gets or sets the quantity.
+        /// </summary>
+        /// <value>
+        /// The quantity.
+        /// </value>
         [BindProperty] public int Quantity { get; set; } = 1;
+        /// <summary>
+        /// Gets or sets the special request.
+        /// </summary>
+        /// <value>
+        /// The special request.
+        /// </value>
         [BindProperty] public string? SpecialRequest { get; set; }
 
         // Properties to display data on the page
+        /// <summary>
+        /// Gets or sets the menu items.
+        /// </summary>
+        /// <value>
+        /// The menu items.
+        /// </value>
         public List<MenuItem> MenuItems { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the current order.
+        /// </summary>
+        /// <value>
+        /// The current order.
+        /// </value>
         public Order? CurrentOrder { get; set; }
+        /// <summary>
+        /// Gets or sets the current order items.
+        /// </summary>
+        /// <value>
+        /// The current order items.
+        /// </value>
         public List<OrderItemViewModel> CurrentOrderItems { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the recent orders.
+        /// </summary>
+        /// <value>
+        /// The recent orders.
+        /// </value>
         public List<Order> RecentOrders { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>
+        /// The message.
+        /// </value>
         public string? Message { get; set; }
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
+        /// <value>
+        /// The error message.
+        /// </value>
         public string? ErrorMessage { get; set; }
 
         // ViewModel remains the same
+        /// <summary>
+        /// 
+        /// </summary>
         public class OrderItemViewModel
         {
+            /// <summary>
+            /// Gets or sets the identifier.
+            /// </summary>
+            /// <value>
+            /// The identifier.
+            /// </value>
             public Guid Id { get; set; }
+            /// <summary>
+            /// Gets or sets the name of the menu item.
+            /// </summary>
+            /// <value>
+            /// The name of the menu item.
+            /// </value>
             public string MenuItemName { get; set; } = string.Empty;
+            /// <summary>
+            /// Gets or sets the quantity.
+            /// </summary>
+            /// <value>
+            /// The quantity.
+            /// </value>
             public int Quantity { get; set; }
+            /// <summary>
+            /// Gets or sets the price.
+            /// </summary>
+            /// <value>
+            /// The price.
+            /// </value>
             public decimal Price { get; set; }
+            /// <summary>
+            /// Gets or sets the special requests.
+            /// </summary>
+            /// <value>
+            /// The special requests.
+            /// </value>
             public string? SpecialRequests { get; set; }
+            /// <summary>
+            /// Gets the line total.
+            /// </summary>
+            /// <value>
+            /// The line total.
+            /// </value>
             public decimal LineTotal => Quantity * Price;
         }
 
         // OnGet uses LoadPageData, which now uses HttpContext directly
+        /// <summary>
+        /// Called when [get].
+        /// </summary>
         public void OnGet()
         {
             LoadPageData();
         }
 
         // Add Item handler - uses HttpContext directly
+        /// <summary>
+        /// Called when [post add item].
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPostAddItem()
         {
             if (!ModelState.IsValid || Quantity <= 0 || MenuItemId == Guid.Empty)
@@ -125,6 +243,10 @@ namespace Restaurant.Web.Pages
         }
 
         // Submit Order handler - uses HttpContext directly
+        /// <summary>
+        /// Called when [post submit order].
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPostSubmitOrder()
         {
             // Use HttpContext directly
@@ -158,6 +280,10 @@ namespace Restaurant.Web.Pages
         }
 
         // Cancel Order handler - uses HttpContext directly
+        /// <summary>
+        /// Called when [post cancel order].
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPostCancelOrder()
         {
             // Use HttpContext directly
@@ -168,6 +294,9 @@ namespace Restaurant.Web.Pages
         }
 
         // LoadPageData helper - uses HttpContext directly
+        /// <summary>
+        /// Loads the page data.
+        /// </summary>
         private void LoadPageData()
         {
             MenuItems = _menuRepo.GetAvailableItems().ToList();
@@ -211,6 +340,11 @@ namespace Restaurant.Web.Pages
 
 
         // Helper remains the same
+        /// <summary>
+        /// Gets the name of the menu item.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
         public string GetMenuItemName(Guid id)
             => _menuRepo.GetById(id)?.Name ?? "[Unknown Item]";
     }

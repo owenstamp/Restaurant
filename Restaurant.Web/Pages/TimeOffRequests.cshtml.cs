@@ -9,11 +9,30 @@ using System.Runtime.CompilerServices;
 
 namespace Restaurant.Web.Pages
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.RazorPages.PageModel" />
     public class TimeOffRequestsModel : PageModel
     {
+        /// <summary>
+        /// The time off repo
+        /// </summary>
         private readonly ITimeOffRequestRepository _timeOffRepo;
+        /// <summary>
+        /// The staff repo
+        /// </summary>
         private readonly IStaffRepository _staffRepo;
+        /// <summary>
+        /// The staff schedule repo
+        /// </summary>
         private readonly IStaffScheduleRepository _StaffScheduleRepo;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TimeOffRequestsModel"/> class.
+        /// </summary>
+        /// <param name="timeOffRepo">The time off repo.</param>
+        /// <param name="staffRepo">The staff repo.</param>
+        /// <param name="StaffScheduleRepo">The staff schedule repo.</param>
         public TimeOffRequestsModel(
             ITimeOffRequestRepository timeOffRepo,
             IStaffRepository staffRepo,
@@ -24,16 +43,42 @@ namespace Restaurant.Web.Pages
             _StaffScheduleRepo = StaffScheduleRepo;
         }
 
+        /// <summary>
+        /// Gets or sets the requests.
+        /// </summary>
+        /// <value>
+        /// The requests.
+        /// </value>
         public List<TimeOffRequest> Requests { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the staff list.
+        /// </summary>
+        /// <value>
+        /// The staff list.
+        /// </value>
         public List<Staff> StaffList { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>
+        /// The message.
+        /// </value>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Called when [get].
+        /// </summary>
         public void OnGet()
         {
             // Load all pending requests and staff for the dropdown
             Requests = _timeOffRepo.GetPendingRequests().ToList();
             StaffList = _staffRepo.GetAll().ToList();
         }
+        /// <summary>
+        /// Called when [post approve].
+        /// </summary>
+        /// <param name="requestId">The request identifier.</param>
+        /// <returns></returns>
         public IActionResult OnPostApprove(Guid requestId)
         {
             var req = _timeOffRepo.GetById(requestId);
@@ -63,6 +108,11 @@ namespace Restaurant.Web.Pages
             return RedirectToPage();
         }
 
+        /// <summary>
+        /// Called when [post reject].
+        /// </summary>
+        /// <param name="requestId">The request identifier.</param>
+        /// <returns></returns>
         public IActionResult OnPostReject(Guid requestId)
         {
             var req = _timeOffRepo.GetById(requestId);

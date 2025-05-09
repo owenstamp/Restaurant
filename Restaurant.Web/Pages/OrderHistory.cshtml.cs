@@ -8,11 +8,26 @@ using System.Linq;
 
 namespace Restaurant.Web.Pages
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.RazorPages.PageModel" />
     public class OrderHistoryModel : PageModel
     {
+        /// <summary>
+        /// The order repo
+        /// </summary>
         private readonly IOrderRepository _orderRepo;
+        /// <summary>
+        /// The menu repo
+        /// </summary>
         private readonly IMenuItemRepository _menuRepo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderHistoryModel"/> class.
+        /// </summary>
+        /// <param name="orderRepo">The order repo.</param>
+        /// <param name="menuRepo">The menu repo.</param>
         public OrderHistoryModel(IOrderRepository orderRepo, IMenuItemRepository menuRepo)
         {
             _orderRepo = orderRepo;
@@ -20,15 +35,38 @@ namespace Restaurant.Web.Pages
         }
 
         // All past orders (could be paged or filtered if you like)
+        /// <summary>
+        /// Gets or sets the past orders.
+        /// </summary>
+        /// <value>
+        /// The past orders.
+        /// </value>
         public List<Order> PastOrders { get; set; } = new();
 
         // The one the user clicked on (if any)
+        /// <summary>
+        /// Gets or sets the selected order.
+        /// </summary>
+        /// <value>
+        /// The selected order.
+        /// </value>
         public Order? SelectedOrder { get; set; }
 
         // A helper dictionary so your Razor can show MenuItem Names by Id
+        /// <summary>
+        /// Gets or sets the menu item names.
+        /// </summary>
+        /// <value>
+        /// The menu item names.
+        /// </value>
         public Dictionary<Guid, string> MenuItemNames { get; set; } = new();
 
         // Optional query‐param to drill into one order
+        /// <summary>
+        /// Called when [get].
+        /// </summary>
+        /// <param name="selectedOrderId">The selected order identifier.</param>
+        /// <returns></returns>
         public IActionResult OnGet(Guid? selectedOrderId = null)
         {
             // 1) Load all orders, newest first

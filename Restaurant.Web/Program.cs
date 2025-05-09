@@ -25,8 +25,7 @@ builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IStaffScheduleRepository, StaffScheduleRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPOSLogRepository, POSLogRepository>();
-builder.Services.AddScoped<IUserAccountRepository, UserAccountRepository>();
-builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+builder.Services.AddScoped<IUserAccountRepository, UserAccountRepository>();;
 builder.Services.AddScoped<ITimeOffRequestRepository, TimeOffRequestRepository>();
 builder.Services.AddScoped<IShiftSwapRequestRepository, ShiftSwapRequestRepository>();
 

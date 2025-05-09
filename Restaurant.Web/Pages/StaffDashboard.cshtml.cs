@@ -9,13 +9,36 @@ using System.Text.Json;
 
 namespace Restaurant.Web.Pages
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Mvc.RazorPages.PageModel" />
     public class StaffDashboardModel : PageModel
     {
+        /// <summary>
+        /// The schedule repo
+        /// </summary>
         private readonly IStaffScheduleRepository _scheduleRepo;
+        /// <summary>
+        /// The staff repo
+        /// </summary>
         private readonly IStaffRepository _staffRepo;
+        /// <summary>
+        /// The swap repo
+        /// </summary>
         private readonly IShiftSwapRequestRepository _swapRepo;
+        /// <summary>
+        /// The time off repo
+        /// </summary>
         private readonly ITimeOffRequestRepository _timeOffRepo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StaffDashboardModel"/> class.
+        /// </summary>
+        /// <param name="scheduleRepo">The schedule repo.</param>
+        /// <param name="staffRepo">The staff repo.</param>
+        /// <param name="swapRepo">The swap repo.</param>
+        /// <param name="timeOffRepo">The time off repo.</param>
         public StaffDashboardModel(
             IStaffScheduleRepository scheduleRepo,
             IStaffRepository staffRepo,
@@ -28,30 +51,139 @@ namespace Restaurant.Web.Pages
             _timeOffRepo = timeOffRepo;
         }
 
+        /// <summary>
+        /// Gets or sets the staff identifier.
+        /// </summary>
+        /// <value>
+        /// The staff identifier.
+        /// </value>
         [BindProperty] public Guid StaffId { get; set; }
+        /// <summary>
+        /// Gets or sets the shift date.
+        /// </summary>
+        /// <value>
+        /// The shift date.
+        /// </value>
         [BindProperty] public DateTime ShiftDate { get; set; }
+        /// <summary>
+        /// Gets or sets the shift start time.
+        /// </summary>
+        /// <value>
+        /// The shift start time.
+        /// </value>
         [BindProperty] public TimeSpan ShiftStartTime { get; set; }
+        /// <summary>
+        /// Gets or sets the shift end time.
+        /// </summary>
+        /// <value>
+        /// The shift end time.
+        /// </value>
         [BindProperty] public TimeSpan ShiftEndTime { get; set; }
+        /// <summary>
+        /// Gets or sets the calendar action.
+        /// </summary>
+        /// <value>
+        /// The calendar action.
+        /// </value>
         [BindProperty] public string CalendarAction { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the start date.
+        /// </summary>
+        /// <value>
+        /// The start date.
+        /// </value>
         [BindProperty] public DateTime StartDate { get; set; }
+        /// <summary>
+        /// Gets or sets the end date.
+        /// </summary>
+        /// <value>
+        /// The end date.
+        /// </value>
         [BindProperty] public DateTime EndDate { get; set; }
+        /// <summary>
+        /// Gets or sets the reason.
+        /// </summary>
+        /// <value>
+        /// The reason.
+        /// </value>
         [BindProperty] public string Reason { get; set; }
+        /// <summary>
+        /// Gets or sets the swap request identifier.
+        /// </summary>
+        /// <value>
+        /// The swap request identifier.
+        /// </value>
         [BindProperty] public Guid SwapRequestId { get; set; }
+        /// <summary>
+        /// Gets or sets the swap action.
+        /// </summary>
+        /// <value>
+        /// The swap action.
+        /// </value>
         [BindProperty] public string SwapAction { get; set; }
 
+        /// <summary>
+        /// Gets or sets my shifts.
+        /// </summary>
+        /// <value>
+        /// My shifts.
+        /// </value>
         public List<StaffSchedule> MyShifts { get; set; } = new();
+        /// <summary>
+        /// Gets or sets all shifts.
+        /// </summary>
+        /// <value>
+        /// All shifts.
+        /// </value>
         public List<StaffSchedule> AllShifts { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the staff list.
+        /// </summary>
+        /// <value>
+        /// The staff list.
+        /// </value>
         public List<Staff> StaffList { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the incoming swap requests.
+        /// </summary>
+        /// <value>
+        /// The incoming swap requests.
+        /// </value>
         public List<ShiftSwapRequest> IncomingSwapRequests { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the manager swap approvals.
+        /// </summary>
+        /// <value>
+        /// The manager swap approvals.
+        /// </value>
         public List<ShiftSwapRequest> ManagerSwapApprovals { get; set; } = new();
+        /// <summary>
+        /// Gets or sets the calendar events json.
+        /// </summary>
+        /// <value>
+        /// The calendar events json.
+        /// </value>
         public string CalendarEventsJson { get; set; } = "[]";
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>
+        /// The message.
+        /// </value>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Called when [get].
+        /// </summary>
         public void OnGet()
         {
             LoadData();
         }
 
+        /// <summary>
+        /// Called when [post].
+        /// </summary>
+        /// <returns></returns>
         public IActionResult OnPost()
         {
             // 1) Identify current staff
@@ -192,6 +324,10 @@ namespace Restaurant.Web.Pages
             return RedirectToPage();
         }
 
+        /// <summary>
+        /// Handles the final approval.
+        /// </summary>
+        /// <param name="swap">The swap.</param>
         private void HandleFinalApproval(ShiftSwapRequest swap)
         {
             swap.Approve();
@@ -218,6 +354,9 @@ namespace Restaurant.Web.Pages
             _scheduleRepo.Update(match);
         }
 
+        /// <summary>
+        /// Loads the data.
+        /// </summary>
         private void LoadData()
         {
             StaffList = _staffRepo.GetAll().OrderBy(s => s.FirstName).ToList();
